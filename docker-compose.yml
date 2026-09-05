@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: ibbf-postgres
+    container_name: back-plataforma-ibbf-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
@@ -10,7 +10,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ibbf_postgres_data:/var/lib/postgresql/data
+      - back_plataforma_ibbf_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d ibbf"]
       interval: 5s
@@ -18,4 +18,4 @@ services:
       retries: 5
 
 volumes:
-  ibbf_postgres_data:
+  back_plataforma_ibbf_postgres_data:
