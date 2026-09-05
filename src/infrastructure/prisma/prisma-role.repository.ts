@@ -9,4 +9,9 @@ export class PrismaRoleRepository implements RoleRepositoryPort {
     const found = await this.dependencies.prismaService.client.role.findUnique({ where: { name } });
     return found ? Role.restore(found) : null;
   }
+
+  async findById(id: string): Promise<Role | null> {
+    const found = await this.dependencies.prismaService.client.role.findUnique({ where: { id } });
+    return found ? Role.restore(found) : null;
+  }
 }
