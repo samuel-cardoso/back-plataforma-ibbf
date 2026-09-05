@@ -3,9 +3,10 @@ import { PAGINATION } from '@/shared/constants';
 import { ministryResponseItemSchema, ministryErrorSchema } from '../ministry-create/ministry-create.schema';
 
 export const ministryListQuerySchema = z.object({
-  page: z.coerce.number().int().positive().optional().default(PAGINATION.DEFAULT_PAGE),
-  limit: z.coerce.number().int().positive().max(PAGINATION.MAX_LIMIT).optional().default(PAGINATION.DEFAULT_LIMIT),
-  search: z.string().optional(),
+  page: z.coerce.number().int().positive().optional().default(PAGINATION.DEFAULT_PAGE).describe('Página (1-indexada).'),
+  limit: z.coerce.number().int().positive().max(PAGINATION.MAX_LIMIT).optional().default(PAGINATION.DEFAULT_LIMIT).describe(`Itens por página (máx. ${PAGINATION.MAX_LIMIT}).`),
+  search: z.string().optional().describe('Busca por `name` (case-insensitive, substring).'),
+  leaderId: z.string().uuid().optional().describe('Filtra ministérios liderados por este Member.'),
 });
 
 export const ministryListResponseSchema = z.object({

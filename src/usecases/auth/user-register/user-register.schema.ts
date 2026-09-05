@@ -16,7 +16,8 @@ export const userRegisterResponseSchema = z.object({
       lastLoginAt: z.string().datetime().nullable(),
       createdAt: z.string().datetime(),
     }),
-    accessToken: z.string(),
+    accessToken: z.string().describe('JWT de curta duração, enviado em `Authorization: Bearer <token>`.'),
+    refreshToken: z.string().describe('Token de longa duração usado em POST /auth/refresh para renovar o accessToken.'),
   }),
 });
 

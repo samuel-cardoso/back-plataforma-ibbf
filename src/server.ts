@@ -30,10 +30,50 @@ export async function createServer() {
   await server.register(jwt, { secret: process.env.JWT_SECRET ?? 'dev-secret-change-in-production' });
   await server.register(fastifyAwilixPlugin, { container, disposeOnClose: true, disposeOnResponse: true });
   await server.register(swagger, {
-    openapi: { info: { title: 'IBBF API', version: '0.1.0' } },
+    openapi: {
+      info: {
+        title: 'IBBF API',
+        version: '0.1.0',
+        description:
+          'Backend da Plataforma IBBF — sistema de gestão para a comunidade da igreja. ' +
+          'Cobre dois subdomínios: **Autenticação** (Role, User, RefreshToken) e ' +
+          '**Administração de Membros** (Member, Family, Ministry, MemberMinistry).\n\n' +
+          '### Autenticação\n' +
+          'A maioria dos endpoints exige um JWT em `Authorization: Bearer <accessToken>`, obtido em ' +
+          '`POST /auth/login` ou `POST /auth/register`. O accessToken expira rápido; use ' +
+          '`POST /auth/refresh` com o `refreshToken` para renová-lo sem pedir a senha de novo.\n\n' +
+          '### Autorização (RBAC)\n' +
+          `Além de autenticado, algumas ações administrativas (criar/editar/excluir Member, Family, ` +
+          `Ministry e gerenciar participações) exigem que a \`Role\` do usuário tenha \`level >= ${'40'}\` ` +
+          '(Secretaria ou acima — ver o seed de roles). Endpoints só-leitura aceitam qualquer usuário autenticado.\n\n' +
+          '### Formato de resposta\n' +
+          'Sucesso: `{ "success": true, "data": {...} }`. Erro: `{ "success": false, "code": "ALGUM_CODE", "message": "..." }` ' +
+          '— o `code` é estável e feito para ser tratado programaticamente pelo cliente; a `message` é só para humanos.',
+      },
+      tags: [
+        { name: 'System', description: 'Endpoints públicos de infraestrutura (health check).' },
+        { name: 'Auth', description: 'Registro, login e ciclo de vida do access/refresh token.' },
+        { name: 'Member', description: 'Cadastro de membros da comunidade — o recurso central do subdomínio de Administração de Membros.' },
+        { name: 'Family', description: 'Núcleos familiares aos quais um Member pode pertencer.' },
+        { name: 'Ministry', description: 'Ministérios/departamentos da igreja e suas participações (MemberMinistry).' },
+      ],
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+            description: 'JWT obtido em POST /auth/login, /auth/register ou /auth/refresh.',
+          },
+        },
+      },
+    },
     transform: jsonSchemaTransform,
   });
-  await server.register(swaggerUi, { routePrefix: '/docs' });
+  await server.register(swaggerUi, {
+    routePrefix: '/docs',
+    uiConfig: { docExpansion: 'list', deepLinking: true },
+  });
 
   // ===== Decorators de autenticação/autorização (usados como preHandler nas rotas) =====
 

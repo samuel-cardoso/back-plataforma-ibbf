@@ -41,9 +41,11 @@ export class PrismaMemberMinistryRepository implements MemberMinistryRepositoryP
 
   async findManyByMinistry(
     ministryId: string,
+    filters: { role?: MemberMinistryProps['role'] },
     pagination: { page: number; limit: number }
   ): Promise<{ data: MemberMinistry[]; total: number }> {
     const where: Prisma.MemberMinistryWhereInput = { ministryId };
+    if (filters.role) where.role = filters.role;
     const skip = (pagination.page - 1) * pagination.limit;
 
     const [rows, total] = await Promise.all([

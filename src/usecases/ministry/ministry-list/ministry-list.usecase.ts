@@ -13,7 +13,10 @@ export class MinistryListUseCase {
     const page = input.page ?? PAGINATION.DEFAULT_PAGE;
     const limit = input.limit ?? PAGINATION.DEFAULT_LIMIT;
 
-    const result = await this.dependencies.ministryRepository.findMany({ search: input.search }, { page, limit });
+    const result = await this.dependencies.ministryRepository.findMany(
+      { search: input.search, leaderId: input.leaderId },
+      { page, limit }
+    );
     const totalPages = Math.ceil(result.total / limit);
 
     return { ministries: result.data, pagination: { total: result.total, page, limit, totalPages } };

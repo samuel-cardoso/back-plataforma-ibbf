@@ -13,6 +13,11 @@ function makeDeps() {
     roleRepository: {
       findByName: vi.fn().mockResolvedValue({ id: 'role-membro', name: 'Membro', level: 20, description: null }),
     },
+    refreshTokenRepository: {
+      create: vi.fn().mockImplementation(async (refreshToken) => refreshToken),
+      findByTokenHash: vi.fn(),
+      update: vi.fn(),
+    },
   };
 }
 
@@ -41,6 +46,8 @@ describe('UserRegisterUseCase', () => {
     expect(result.user.email).toBe('maria@example.com');
     expect(result.user.roleId).toBe('role-membro');
     expect(result.accessToken).toBe('fake-jwt-token');
+    expect(deps.refreshTokenRepository.create).toHaveBeenCalledTimes(1);
+    expect(result.refreshToken).toEqual(expect.any(String));
   });
 
   it('rejeita com DomainError USER.EMAIL_ALREADY_EXISTS se o email já está em uso', async () => {

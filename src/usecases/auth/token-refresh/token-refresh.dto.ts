@@ -1,6 +1,5 @@
-export interface UserLoginInput {
-  email: string;
-  password: string;
+export interface TokenRefreshInput {
+  refreshToken: string;
   userAgent?: string;
   jwtSign: (payload: Record<string, unknown>) => Promise<string>;
 }

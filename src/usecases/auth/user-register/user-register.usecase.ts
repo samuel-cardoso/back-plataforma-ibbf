@@ -1,12 +1,14 @@
-import { User } from '@/models';
+import { RefreshToken, User } from '@/models';
 import { DomainError } from '@/shared/errors';
 import { DEFAULT_USER_ROLE_NAME } from '@/shared/constants';
-import { RoleRepositoryPort, UserRepositoryPort } from '@/repositories';
+import { createRefreshTokenValue } from '@/shared/refresh-token';
+import { RefreshTokenRepositoryPort, RoleRepositoryPort, UserRepositoryPort } from '@/repositories';
 import type { UserRegisterInput } from './user-register.dto';
 
 interface Dependencies {
   userRepository: UserRepositoryPort;
   roleRepository: RoleRepositoryPort;
+  refreshTokenRepository: RefreshTokenRepositoryPort;
 }
 
 export class UserRegisterUseCase {
@@ -32,8 +34,18 @@ export class UserRegisterUseCase {
     });
 
     const created = await this.dependencies.userRepository.create(user);
+
+    const { raw, tokenHash, expiresAt } = createRefreshTokenValue();
+    const refreshToken = RefreshToken.create({
+      userId: created.id as string,
+      tokenHash,
+      expiresAt,
+      userAgent: input.userAgent,
+    });
+    await this.dependencies.refreshTokenRepository.create(refreshToken);
+
     const accessToken = await input.jwtSign({ sub: created.id, email: created.email, roleId: created.roleId });
 
-    return { user: created, accessToken };
+    return { user: created, accessToken, refreshToken: raw };
   }
 }

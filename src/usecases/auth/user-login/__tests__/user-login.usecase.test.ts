@@ -24,6 +24,11 @@ function makeDeps(user: ReturnType<typeof makeUser> | null = makeUser()) {
       findById: vi.fn(),
       updateLastLogin: vi.fn(),
     },
+    refreshTokenRepository: {
+      create: vi.fn().mockImplementation(async (refreshToken) => refreshToken),
+      findByTokenHash: vi.fn(),
+      update: vi.fn(),
+    },
   };
 }
 
@@ -47,6 +52,8 @@ describe('UserLoginUseCase', () => {
     expect(user.recordLogin).toHaveBeenCalledTimes(1);
     expect(deps.userRepository.updateLastLogin).toHaveBeenCalledWith('user-1', expect.any(Date));
     expect(result.accessToken).toBe('fake-jwt-token');
+    expect(deps.refreshTokenRepository.create).toHaveBeenCalledTimes(1);
+    expect(result.refreshToken).toEqual(expect.any(String));
   });
 
   it('rejeita com USER.INVALID_CREDENTIALS se o usuário não existe', async () => {

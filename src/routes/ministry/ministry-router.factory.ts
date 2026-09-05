@@ -27,7 +27,10 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.get('/', {
     preHandler: [server.authenticate()],
     schema: {
-      tags: ['Ministry'], summary: 'List ministries', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'List ministries',
+      description: 'Lista ministérios com paginação, busca por nome e filtro por líder. Requer apenas autenticação.',
+      security: [{ bearerAuth: [] }],
       querystring: ministryListQuerySchema,
       response: { 200: ministryListResponseSchema },
     },
@@ -39,7 +42,10 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.get('/:id', {
     preHandler: [server.authenticate()],
     schema: {
-      tags: ['Ministry'], summary: 'Get ministry details', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Get ministry details',
+      description: 'Retorna um ministério pelo id. Requer apenas autenticação. 404 se não existir.',
+      security: [{ bearerAuth: [] }],
       params: ministryDetailsParamsSchema,
       response: { 200: ministryDetailsResponseSchema },
     },
@@ -51,7 +57,12 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.post('/', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Create a ministry', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Create a ministry',
+      description:
+        `Cria um novo ministério (ex: "Louvor", "Infantil"). O nome deve ser único (\`MINISTRY.NAME_ALREADY_EXISTS\`). ` +
+        `\`leaderId\`, se informado, deve ser o id de um Member existente. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
+      security: [{ bearerAuth: [] }],
       body: ministryCreateSchema,
       response: { 201: ministryCreateResponseSchema, 400: ministryErrorSchema },
     },
@@ -63,7 +74,11 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.patch('/:id', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Update a ministry', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Update a ministry',
+      description:
+        `Atualiza nome, descrição ou líder do ministério (envie \`leaderId: null\` para remover o líder). Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
+      security: [{ bearerAuth: [] }],
       params: ministryUpdateParamsSchema,
       body: ministryUpdateSchema,
       response: { 200: ministryUpdateResponseSchema },
@@ -76,7 +91,11 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.delete('/:id', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Delete a ministry', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Delete a ministry',
+      description:
+        `Remove um ministério e todas as participações (MemberMinistry) associadas a ele (ON DELETE CASCADE). Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
+      security: [{ bearerAuth: [] }],
       params: ministryDeleteParamsSchema,
       response: { 200: ministryDeleteResponseSchema },
     },
@@ -86,11 +105,16 @@ export async function ministryRoutes(server: FastifyInstance) {
   });
 
   // ===== Participantes (MemberMinistry) =====
+  // Resolve a relação N:N entre Member e Ministry — ver ERD "Administração de Membros".
 
   server.get('/:ministryId/members', {
     preHandler: [server.authenticate()],
     schema: {
-      tags: ['Ministry'], summary: 'List ministry participants', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'List ministry participants',
+      description:
+        'Lista os membros que participam deste ministério, com `memberName` já resolvido via join. Filtro opcional por `role` (LEADER/MEMBER). Requer apenas autenticação.',
+      security: [{ bearerAuth: [] }],
       params: ministryMemberListParamsSchema,
       querystring: ministryMemberListQuerySchema,
       response: { 200: ministryMemberListResponseSchema },
@@ -103,7 +127,11 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.post('/:ministryId/members', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Add a member to the ministry', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Add a member to the ministry',
+      description:
+        `Registra a participação de um Member neste Ministry, com papel LEADER ou MEMBER (padrão: MEMBER). Falha com \`MEMBER_MINISTRY.ALREADY_PARTICIPATING\` se o membro já participar. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}. Isto não altera o \`leaderId\` do ministério — para definir o líder "oficial", use PATCH /ministries/:id.`,
+      security: [{ bearerAuth: [] }],
       params: ministryMemberAddParamsSchema,
       body: ministryMemberAddSchema,
       response: { 201: ministryMemberAddResponseSchema, 400: ministryMemberErrorSchema },
@@ -116,7 +144,10 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.patch('/:ministryId/members/:memberId', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Update a participant role', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Update a participant role',
+      description: `Troca o papel (LEADER/MEMBER) de um participante já existente. 404 se o membro não participar do ministério. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
+      security: [{ bearerAuth: [] }],
       params: ministryMemberUpdateRoleParamsSchema,
       body: ministryMemberUpdateRoleSchema,
       response: { 200: ministryMemberUpdateRoleResponseSchema },
@@ -129,7 +160,10 @@ export async function ministryRoutes(server: FastifyInstance) {
   server.delete('/:ministryId/members/:memberId', {
     preHandler: [server.authenticate(), server.authorize(STAFF_MIN_ROLE_LEVEL)],
     schema: {
-      tags: ['Ministry'], summary: 'Remove a member from the ministry', security: [{ bearerAuth: [] }],
+      tags: ['Ministry'],
+      summary: 'Remove a member from the ministry',
+      description: `Remove a participação de um membro no ministério. 404 se ele não participar. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
+      security: [{ bearerAuth: [] }],
       params: ministryMemberRemoveParamsSchema,
       response: { 200: ministryMemberRemoveResponseSchema },
     },

@@ -1,4 +1,4 @@
-import { MemberMinistry } from '@/models';
+import { MemberMinistry, MemberMinistryRole } from '@/models';
 
 export interface MemberMinistryRepositoryPort {
   create(memberMinistry: MemberMinistry): Promise<MemberMinistry>;
@@ -6,6 +6,7 @@ export interface MemberMinistryRepositoryPort {
   /** Lista participantes de um ministério, já com `memberName` preenchido (join). */
   findManyByMinistry(
     ministryId: string,
+    filters: { role?: MemberMinistryRole },
     pagination: { page: number; limit: number }
   ): Promise<{ data: MemberMinistry[]; total: number }>;
   update(memberMinistry: MemberMinistry): Promise<MemberMinistry>;

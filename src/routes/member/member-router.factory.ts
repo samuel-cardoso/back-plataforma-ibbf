@@ -21,6 +21,8 @@ export async function memberRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Member'],
       summary: 'List members',
+      description:
+        'Lista membros com paginação, busca por nome e filtros por tipo/status/família. Requer apenas autenticação (qualquer role).',
       security: [{ bearerAuth: [] }],
       querystring: memberListQuerySchema,
       response: { 200: memberListResponseSchema },
@@ -35,6 +37,7 @@ export async function memberRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Member'],
       summary: 'Get member details',
+      description: 'Retorna um membro pelo id. Requer apenas autenticação. 404 se não existir.',
       security: [{ bearerAuth: [] }],
       params: memberDetailsParamsSchema,
       response: { 200: memberDetailsResponseSchema },
@@ -49,6 +52,10 @@ export async function memberRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Member'],
       summary: 'Create a member',
+      description:
+        `Cria um novo cadastro de membro. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL} (Secretaria ou acima). ` +
+        'O CPF, se informado, deve ser único (11 dígitos, com ou sem máscara) — falha com `MEMBER.CPF_ALREADY_EXISTS`. ' +
+        '`familyId`/`userId` inválidos falham com `MEMBER.INVALID_REFERENCE`.',
       security: [{ bearerAuth: [] }],
       body: memberCreateSchema,
       response: { 201: memberCreateResponseSchema, 400: memberErrorSchema },
@@ -63,6 +70,8 @@ export async function memberRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Member'],
       summary: 'Update a member',
+      description:
+        `Atualiza parcialmente um membro (só os campos enviados são alterados). Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
       security: [{ bearerAuth: [] }],
       params: memberUpdateParamsSchema,
       body: memberUpdateSchema,
@@ -78,6 +87,7 @@ export async function memberRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Member'],
       summary: 'Delete a member',
+      description: `Remove um membro definitivamente. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
       security: [{ bearerAuth: [] }],
       params: memberDeleteParamsSchema,
       response: { 200: memberDeleteResponseSchema },

@@ -18,6 +18,7 @@ export class MinistryMemberListController {
       ministryId: params.ministryId,
       page: query.page,
       limit: query.limit,
+      role: query.role,
     });
 
     return reply.status(200).send({

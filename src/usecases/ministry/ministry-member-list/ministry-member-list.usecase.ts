@@ -13,10 +13,11 @@ export class MinistryMemberListUseCase {
     const page = input.page ?? PAGINATION.DEFAULT_PAGE;
     const limit = input.limit ?? PAGINATION.DEFAULT_LIMIT;
 
-    const result = await this.dependencies.memberMinistryRepository.findManyByMinistry(input.ministryId, {
-      page,
-      limit,
-    });
+    const result = await this.dependencies.memberMinistryRepository.findManyByMinistry(
+      input.ministryId,
+      { role: input.role },
+      { page, limit }
+    );
     const totalPages = Math.ceil(result.total / limit);
 
     return { participations: result.data, pagination: { total: result.total, page, limit, totalPages } };

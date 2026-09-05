@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { Member, MemberProps } from '@/models';
-import { MemberRepositoryPort } from '@/repositories';
+import { MemberListFilters, MemberRepositoryPort } from '@/repositories';
 import { DomainError } from '@/shared/errors';
 import { PrismaService } from './prisma.service';
 
@@ -42,13 +42,16 @@ export class PrismaMemberRepository implements MemberRepositoryPort {
   }
 
   async findMany(
-    filters: { search?: string },
+    filters: MemberListFilters,
     pagination: { page: number; limit: number }
   ): Promise<{ data: Member[]; total: number }> {
     const where: Prisma.MemberWhereInput = {};
     if (filters.search) {
       where.fullName = { contains: filters.search, mode: 'insensitive' };
     }
+    if (filters.memberType) where.memberType = filters.memberType;
+    if (filters.memberStatus) where.memberStatus = filters.memberStatus;
+    if (filters.familyId) where.familyId = filters.familyId;
 
     const skip = (pagination.page - 1) * pagination.limit;
     const [rows, total] = await Promise.all([

@@ -2,6 +2,7 @@ import { asClass, createContainer, InjectionMode, Lifetime } from 'awilix';
 import { PrismaService } from './infrastructure/prisma/prisma.service';
 import { PrismaRoleRepository } from './infrastructure/prisma/prisma-role.repository';
 import { PrismaUserRepository } from './infrastructure/prisma/prisma-user.repository';
+import { PrismaRefreshTokenRepository } from './infrastructure/prisma/prisma-refresh-token.repository';
 import { PrismaMemberRepository } from './infrastructure/prisma/prisma-member.repository';
 import { PrismaFamilyRepository } from './infrastructure/prisma/prisma-family.repository';
 import { PrismaMinistryRepository } from './infrastructure/prisma/prisma-ministry.repository';
@@ -14,6 +15,10 @@ import { UserRegisterController } from './usecases/auth/user-register/user-regis
 import { UserRegisterUseCase } from './usecases/auth/user-register/user-register.usecase';
 import { UserLoginController } from './usecases/auth/user-login/user-login.controller';
 import { UserLoginUseCase } from './usecases/auth/user-login/user-login.usecase';
+import { TokenRefreshController } from './usecases/auth/token-refresh/token-refresh.controller';
+import { TokenRefreshUseCase } from './usecases/auth/token-refresh/token-refresh.usecase';
+import { LogoutController } from './usecases/auth/logout/logout.controller';
+import { LogoutUseCase } from './usecases/auth/logout/logout.usecase';
 
 import { MemberCreateController } from './usecases/member/member-create/member-create.controller';
 import { MemberCreateUseCase } from './usecases/member/member-create/member-create.usecase';
@@ -64,6 +69,7 @@ container.register({
   // Repositories — um por processo (SINGLETON): não têm estado de requisição.
   roleRepository: asClass(PrismaRoleRepository, { lifetime: Lifetime.SINGLETON }),
   userRepository: asClass(PrismaUserRepository, { lifetime: Lifetime.SINGLETON }),
+  refreshTokenRepository: asClass(PrismaRefreshTokenRepository, { lifetime: Lifetime.SINGLETON }),
   memberRepository: asClass(PrismaMemberRepository, { lifetime: Lifetime.SINGLETON }),
   familyRepository: asClass(PrismaFamilyRepository, { lifetime: Lifetime.SINGLETON }),
   ministryRepository: asClass(PrismaMinistryRepository, { lifetime: Lifetime.SINGLETON }),
@@ -76,6 +82,10 @@ container.register({
   userRegisterController: asClass(UserRegisterController, { lifetime: Lifetime.SCOPED }),
   userLoginUseCase: asClass(UserLoginUseCase, { lifetime: Lifetime.SCOPED }),
   userLoginController: asClass(UserLoginController, { lifetime: Lifetime.SCOPED }),
+  tokenRefreshUseCase: asClass(TokenRefreshUseCase, { lifetime: Lifetime.SCOPED }),
+  tokenRefreshController: asClass(TokenRefreshController, { lifetime: Lifetime.SCOPED }),
+  logoutUseCase: asClass(LogoutUseCase, { lifetime: Lifetime.SCOPED }),
+  logoutController: asClass(LogoutController, { lifetime: Lifetime.SCOPED }),
 
   memberCreateUseCase: asClass(MemberCreateUseCase, { lifetime: Lifetime.SCOPED }),
   memberCreateController: asClass(MemberCreateController, { lifetime: Lifetime.SCOPED }),

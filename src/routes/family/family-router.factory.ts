@@ -18,6 +18,7 @@ export async function familyRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Family'],
       summary: 'List families',
+      description: 'Lista famílias com paginação e busca por nome. Requer apenas autenticação (qualquer role).',
       security: [{ bearerAuth: [] }],
       querystring: familyListQuerySchema,
       response: { 200: familyListResponseSchema },
@@ -32,6 +33,7 @@ export async function familyRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Family'],
       summary: 'Get family details',
+      description: 'Retorna uma família pelo id. Requer apenas autenticação. 404 se não existir.',
       security: [{ bearerAuth: [] }],
       params: familyDetailsParamsSchema,
       response: { 200: familyDetailsResponseSchema },
@@ -46,6 +48,7 @@ export async function familyRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Family'],
       summary: 'Create a family',
+      description: `Cria uma nova família (ex: "Família Silva"). Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
       security: [{ bearerAuth: [] }],
       body: familyCreateSchema,
       response: { 201: familyCreateResponseSchema, 400: familyErrorSchema },
@@ -60,6 +63,7 @@ export async function familyRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Family'],
       summary: 'Update a family',
+      description: `Renomeia uma família. Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
       security: [{ bearerAuth: [] }],
       params: familyUpdateParamsSchema,
       body: familyUpdateSchema,
@@ -75,6 +79,9 @@ export async function familyRoutes(server: FastifyInstance) {
     schema: {
       tags: ['Family'],
       summary: 'Delete a family',
+      description:
+        `Remove uma família. Membros vinculados NÃO são apagados — seu \`familyId\` simplesmente vira \`null\` (ON DELETE SET NULL). ` +
+        `Requer role com level >= ${STAFF_MIN_ROLE_LEVEL}.`,
       security: [{ bearerAuth: [] }],
       params: familyDeleteParamsSchema,
       response: { 200: familyDeleteResponseSchema },

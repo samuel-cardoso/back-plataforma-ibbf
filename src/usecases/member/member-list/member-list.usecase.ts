@@ -13,7 +13,15 @@ export class MemberListUseCase {
     const page = input.page ?? PAGINATION.DEFAULT_PAGE;
     const limit = input.limit ?? PAGINATION.DEFAULT_LIMIT;
 
-    const result = await this.dependencies.memberRepository.findMany({ search: input.search }, { page, limit });
+    const result = await this.dependencies.memberRepository.findMany(
+      {
+        search: input.search,
+        memberType: input.memberType,
+        memberStatus: input.memberStatus,
+        familyId: input.familyId,
+      },
+      { page, limit }
+    );
     const totalPages = Math.ceil(result.total / limit);
 
     return {

@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { Ministry } from '@/models';
-import { MinistryRepositoryPort } from '@/repositories';
+import { MinistryListFilters, MinistryRepositoryPort } from '@/repositories';
 import { DomainError } from '@/shared/errors';
 import { PrismaService } from './prisma.service';
 
@@ -24,13 +24,14 @@ export class PrismaMinistryRepository implements MinistryRepositoryPort {
   }
 
   async findMany(
-    filters: { search?: string },
+    filters: MinistryListFilters,
     pagination: { page: number; limit: number }
   ): Promise<{ data: Ministry[]; total: number }> {
     const where: Prisma.MinistryWhereInput = {};
     if (filters.search) {
       where.name = { contains: filters.search, mode: 'insensitive' };
     }
+    if (filters.leaderId) where.leaderId = filters.leaderId;
 
     const skip = (pagination.page - 1) * pagination.limit;
     const [rows, total] = await Promise.all([

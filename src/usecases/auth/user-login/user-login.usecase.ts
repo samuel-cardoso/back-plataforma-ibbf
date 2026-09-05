@@ -1,9 +1,12 @@
+import { RefreshToken } from '@/models';
 import { DomainError } from '@/shared/errors';
-import { UserRepositoryPort } from '@/repositories';
+import { createRefreshTokenValue } from '@/shared/refresh-token';
+import { RefreshTokenRepositoryPort, UserRepositoryPort } from '@/repositories';
 import type { UserLoginInput } from './user-login.dto';
 
 interface Dependencies {
   userRepository: UserRepositoryPort;
+  refreshTokenRepository: RefreshTokenRepositoryPort;
 }
 
 export class UserLoginUseCase {
@@ -26,8 +29,17 @@ export class UserLoginUseCase {
     user.recordLogin();
     await this.dependencies.userRepository.updateLastLogin(user.id as string, user.lastLoginAt as Date);
 
+    const { raw, tokenHash, expiresAt } = createRefreshTokenValue();
+    const refreshToken = RefreshToken.create({
+      userId: user.id as string,
+      tokenHash,
+      expiresAt,
+      userAgent: input.userAgent,
+    });
+    await this.dependencies.refreshTokenRepository.create(refreshToken);
+
     const accessToken = await input.jwtSign({ sub: user.id, email: user.email, roleId: user.roleId });
 
-    return { user, accessToken };
+    return { user, accessToken, refreshToken: raw };
   }
 }

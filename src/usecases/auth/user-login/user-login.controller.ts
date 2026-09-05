@@ -16,12 +16,13 @@ export class UserLoginController {
     const result = await this.dependencies.userLoginUseCase.execute({
       email: body.email,
       password: body.password,
+      userAgent: request.headers['user-agent'],
       jwtSign: (payload) => reply.jwtSign(payload),
     });
 
     return reply.status(200).send({
       success: true,
-      data: { user: result.user.toJSON(), accessToken: result.accessToken },
+      data: { user: result.user.toJSON(), accessToken: result.accessToken, refreshToken: result.refreshToken },
     });
   }
 }

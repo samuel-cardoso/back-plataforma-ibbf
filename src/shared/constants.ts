@@ -9,3 +9,6 @@ export const PAGINATION = {
   DEFAULT_LIMIT: 20,
   MAX_LIMIT: 100,
 } as const;
+
+/** Validade de um refresh token emitido em /auth/login, /auth/register ou /auth/refresh. */
+export const REFRESH_TOKEN_TTL_DAYS = 30;
