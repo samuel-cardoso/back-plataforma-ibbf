@@ -1,0 +1,925 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2025-09-04T15:33:20.000Z",
+  "__export_source": "insomnia.desktop.app:v8.6.1",
+  "resources": [
+    {
+      "_id": "wrk_ibbf_api",
+      "parentId": null,
+      "modified": 1757000000000,
+      "created": 1757000000001,
+      "name": "IBBF API",
+      "description": "Backend da Plataforma IBBF (Fastify + Prisma + Zod + Awilix) — Autenticação e Administração de Membros.\n\n## Como usar\n1. Suba a API localmente (`npm run dev`, porta padrão 3010) ou ajuste a variável `base_url`.\n2. Rode \"Auth > Register\" ou \"Auth > Login\". Copie `accessToken` e `refreshToken` da resposta para as variáveis de ambiente `access_token` e `refresh_token` (Manage Environments).\n3. Todas as requisições protegidas já usam Bearer Auth com `{{ _.access_token }}` — não precisa configurar nada extra.\n4. Quando o `accessToken` expirar, rode \"Auth > Refresh\" (usa `refresh_token`) e atualize as duas variáveis com a nova resposta.\n5. Para os endpoints com id na URL, preencha `member_id`, `family_id` e/ou `ministry_id` no ambiente, ou edite a URL da requisição diretamente.\n\n## RBAC\nListar/ver (GET) exige só estar autenticado. Criar/editar/excluir Member, Family, Ministry e gerenciar participações exige uma Role com `level >= 40` (Secretaria, Líder, Pastor ou Admin). Um usuário registrado via \"Auth > Register\" recebe a role \"Membro\" (level 20) por padrão — para testar as rotas protegidas, promova esse usuário no banco (`UPDATE users SET \"roleId\" = (SELECT id FROM roles WHERE name = 'Secretaria') WHERE email = ...`) ou rode `npm run db:seed` e cadastre-se com um usuário de nível superior.\n\n## Formato de resposta\nSucesso: `{ \"success\": true, \"data\": {...} }`. Erro: `{ \"success\": false, \"code\": \"ALGUM_CODE\", \"message\": \"...\" }`.",
+      "scope": "collection",
+      "_type": "workspace"
+    },
+    {
+      "_id": "env_ibbf_base",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000002,
+      "created": 1757000000003,
+      "name": "Base Environment",
+      "data": {
+        "base_url": "http://localhost:3010",
+        "access_token": "",
+        "refresh_token": "",
+        "member_id": "",
+        "family_id": "",
+        "ministry_id": ""
+      },
+      "dataPropertyOrder": {
+        "&": [
+          "base_url",
+          "access_token",
+          "refresh_token",
+          "member_id",
+          "family_id",
+          "ministry_id"
+        ]
+      },
+      "color": null,
+      "isPrivate": false,
+      "metaSortKey": 0,
+      "_type": "environment"
+    },
+    {
+      "_id": "fld_system",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000004,
+      "created": 1757000000005,
+      "name": "System",
+      "description": "Endpoints públicos de infraestrutura.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 0,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_system_health",
+      "parentId": "fld_system",
+      "modified": 1757000000006,
+      "created": 1757000000007,
+      "url": "{{ _.base_url }}/health",
+      "name": "Health Check",
+      "description": "Endpoint público, sem autenticação. Útil para health checks de infraestrutura (load balancer, orquestrador, uptime monitor). Resposta: `{ success: true, data: { status: \"ok\", timestamp } }`.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {},
+      "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_auth",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000008,
+      "created": 1757000000009,
+      "name": "Auth",
+      "description": "Registro, login e ciclo de vida do access/refresh token. Nenhuma rota aqui exige Bearer Auth.",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 1000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_auth_register",
+      "parentId": "fld_auth",
+      "modified": 1757000000010,
+      "created": 1757000000011,
+      "url": "{{ _.base_url }}/auth/register",
+      "name": "Register",
+      "description": "Cria uma conta de login (User) com a role padrão \"Membro\" e devolve um par accessToken/refreshToken já autenticado.\n\n**Erros:** `USER.EMAIL_ALREADY_EXISTS` (400) se o email já estiver em uso; `USER.INVALID_EMAIL` / `USER.INVALID_PASSWORD` (400) para dados inválidos (senha precisa ter ao menos 6 caracteres).\n\nDepois de rodar, copie `data.accessToken` e `data.refreshToken` para as variáveis de ambiente `access_token`/`refresh_token`.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\",\n  \"password\": \"senha123\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_login",
+      "parentId": "fld_auth",
+      "modified": 1757000000012,
+      "created": 1757000000013,
+      "url": "{{ _.base_url }}/auth/login",
+      "name": "Login",
+      "description": "Autentica por email/senha e devolve um novo par accessToken/refreshToken. Atualiza `lastLoginAt`.\n\n**Erros:** sempre `USER.INVALID_CREDENTIALS` (400) para email inexistente, usuário bloqueado/inativo ou senha incorreta — a API nunca revela qual credencial estava errada.\n\nDepois de rodar, copie `data.accessToken` e `data.refreshToken` para as variáveis de ambiente `access_token`/`refresh_token`.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\",\n  \"password\": \"senha123\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_refresh",
+      "parentId": "fld_auth",
+      "modified": 1757000000014,
+      "created": 1757000000015,
+      "url": "{{ _.base_url }}/auth/refresh",
+      "name": "Refresh Token",
+      "description": "Troca um `refreshToken` válido por um novo par accessToken/refreshToken. **Rotação:** o refresh token usado é revogado nesta chamada — cada um só pode ser usado uma vez. Não exige `Authorization`; o próprio refreshToken no corpo é a credencial.\n\n**Erros:** `AUTH.INVALID_REFRESH_TOKEN` (400) se o token não existir, estiver expirado, já tiver sido revogado, ou se o usuário dono não estiver mais ACTIVE.\n\nDepois de rodar, atualize `access_token` e `refresh_token` no ambiente com os novos valores.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_logout",
+      "parentId": "fld_auth",
+      "modified": 1757000000016,
+      "created": 1757000000017,
+      "url": "{{ _.base_url }}/auth/logout",
+      "name": "Logout",
+      "description": "Revoga o refresh token informado, encerrando aquela sessão específica (outras sessões/dispositivos do mesmo usuário continuam válidas). Idempotente: sempre responde 200, mesmo se o token já estava revogado ou não existir.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"refreshToken\": \"{{ _.refresh_token }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_member",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000018,
+      "created": 1757000000019,
+      "name": "Member",
+      "description": "Cadastro de membros da comunidade — o recurso central do subdomínio de Administração de Membros. GET exige só autenticação; escrita exige role com level >= 40 (Secretaria+).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 2000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_member_list",
+      "parentId": "fld_member",
+      "modified": 1757000000020,
+      "created": 1757000000021,
+      "url": "{{ _.base_url }}/members",
+      "name": "List Members",
+      "description": "Lista membros com paginação, busca por nome e filtros por tipo/status/família. Requer apenas autenticação (qualquer role).",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "disabled": true,
+          "description": "Página (1-indexada). Padrão: 1."
+        },
+        {
+          "name": "limit",
+          "value": "20",
+          "disabled": true,
+          "description": "Itens por página (máx. 100). Padrão: 20."
+        },
+        {
+          "name": "search",
+          "value": "Ana",
+          "disabled": true,
+          "description": "Busca por fullName (case-insensitive, substring)."
+        },
+        {
+          "name": "memberType",
+          "value": "MEMBER",
+          "disabled": true,
+          "description": "MEMBER | CONGREGANT | VISITOR"
+        },
+        {
+          "name": "memberStatus",
+          "value": "ACTIVE",
+          "disabled": true,
+          "description": "ACTIVE | INACTIVE | TRANSFERRED"
+        },
+        {
+          "name": "familyId",
+          "value": "{{ _.family_id }}",
+          "disabled": true,
+          "description": "Filtra membros desta família."
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_member_details",
+      "parentId": "fld_member",
+      "modified": 1757000000022,
+      "created": 1757000000023,
+      "url": "{{ _.base_url }}/members/{{ _.member_id }}",
+      "name": "Get Member",
+      "description": "Retorna um membro pelo id. Requer apenas autenticação. 404 (`NOT_FOUND`) se não existir.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_member_create",
+      "parentId": "fld_member",
+      "modified": 1757000000024,
+      "created": 1757000000025,
+      "url": "{{ _.base_url }}/members",
+      "name": "Create Member",
+      "description": "Cria um novo cadastro de membro. Requer role com level >= 40 (Secretaria+).\n\nCampos obrigatórios: `fullName`, `birthDate`, `memberType`. Todos os demais são opcionais.\n\n**Erros:** `MEMBER.CPF_ALREADY_EXISTS` (400) se o CPF já pertence a outro membro; `MEMBER.INVALID_REFERENCE` (400) se `familyId`/`userId` não existirem; `MEMBER.INVALID_FULL_NAME` / `MEMBER.INVALID_BIRTH_DATE` / `MEMBER.INVALID_CPF` (400) para dados inválidos.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"fullName\": \"Ana Souza\",\n  \"cpf\": \"123.456.789-09\",\n  \"birthDate\": \"1995-03-10\",\n  \"phone\": \"11999998888\",\n  \"address\": \"Rua das Flores, 123 - São Paulo/SP\",\n  \"memberType\": \"MEMBER\",\n  \"memberStatus\": \"ACTIVE\",\n  \"joinedAt\": \"2024-01-15\",\n  \"baptized\": true,\n  \"familyId\": \"{{ _.family_id }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_member_update",
+      "parentId": "fld_member",
+      "modified": 1757000000026,
+      "created": 1757000000027,
+      "url": "{{ _.base_url }}/members/{{ _.member_id }}",
+      "name": "Update Member",
+      "description": "Atualiza parcialmente um membro — só os campos enviados são alterados. Requer role com level >= 40 (Secretaria+). Mesmos códigos de erro de \"Create Member\".",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"memberStatus\": \"TRANSFERRED\",\n  \"phone\": \"11988887777\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_member_delete",
+      "parentId": "fld_member",
+      "modified": 1757000000028,
+      "created": 1757000000029,
+      "url": "{{ _.base_url }}/members/{{ _.member_id }}",
+      "name": "Delete Member",
+      "description": "Remove um membro definitivamente. Requer role com level >= 40 (Secretaria+). Referências opcionais (Ministry.leaderId, Member.userId/familyId) são zeradas automaticamente (ON DELETE SET NULL); participações em ministérios (MemberMinistry) são removidas em cascata.",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_family",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000030,
+      "created": 1757000000031,
+      "name": "Family",
+      "description": "Núcleos familiares aos quais um Member pode pertencer. GET exige só autenticação; escrita exige role com level >= 40 (Secretaria+).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 3000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_family_list",
+      "parentId": "fld_family",
+      "modified": 1757000000032,
+      "created": 1757000000033,
+      "url": "{{ _.base_url }}/families",
+      "name": "List Families",
+      "description": "Lista famílias com paginação e busca por nome. Requer apenas autenticação.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "disabled": true
+        },
+        {
+          "name": "limit",
+          "value": "20",
+          "disabled": true
+        },
+        {
+          "name": "search",
+          "value": "Silva",
+          "disabled": true,
+          "description": "Busca por name (case-insensitive, substring)."
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_family_details",
+      "parentId": "fld_family",
+      "modified": 1757000000034,
+      "created": 1757000000035,
+      "url": "{{ _.base_url }}/families/{{ _.family_id }}",
+      "name": "Get Family",
+      "description": "Retorna uma família pelo id. Requer apenas autenticação. 404 se não existir.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_family_create",
+      "parentId": "fld_family",
+      "modified": 1757000000036,
+      "created": 1757000000037,
+      "url": "{{ _.base_url }}/families",
+      "name": "Create Family",
+      "description": "Cria uma nova família. Requer role com level >= 40 (Secretaria+). Erro: `FAMILY.INVALID_NAME` (400) se o nome vier vazio.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Família Silva\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_family_update",
+      "parentId": "fld_family",
+      "modified": 1757000000038,
+      "created": 1757000000039,
+      "url": "{{ _.base_url }}/families/{{ _.family_id }}",
+      "name": "Update Family",
+      "description": "Renomeia uma família. Requer role com level >= 40 (Secretaria+).",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Família Silva Souza\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_family_delete",
+      "parentId": "fld_family",
+      "modified": 1757000000040,
+      "created": 1757000000041,
+      "url": "{{ _.base_url }}/families/{{ _.family_id }}",
+      "name": "Delete Family",
+      "description": "Remove uma família. Membros vinculados NÃO são apagados — seu familyId simplesmente vira null (ON DELETE SET NULL). Requer role com level >= 40 (Secretaria+).",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "fld_ministry",
+      "parentId": "wrk_ibbf_api",
+      "modified": 1757000000042,
+      "created": 1757000000043,
+      "name": "Ministry",
+      "description": "Ministérios/departamentos da igreja e suas participações (MemberMinistry) — resolve a relação N:N entre Member e Ministry. GET exige só autenticação; escrita exige role com level >= 40 (Secretaria+).",
+      "environment": {},
+      "environmentPropertyOrder": null,
+      "metaSortKey": 4000,
+      "_type": "request_group"
+    },
+    {
+      "_id": "req_ministry_list",
+      "parentId": "fld_ministry",
+      "modified": 1757000000044,
+      "created": 1757000000045,
+      "url": "{{ _.base_url }}/ministries",
+      "name": "List Ministries",
+      "description": "Lista ministérios com paginação, busca por nome e filtro por líder. Requer apenas autenticação.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "disabled": true
+        },
+        {
+          "name": "limit",
+          "value": "20",
+          "disabled": true
+        },
+        {
+          "name": "search",
+          "value": "Louvor",
+          "disabled": true,
+          "description": "Busca por name (case-insensitive, substring)."
+        },
+        {
+          "name": "leaderId",
+          "value": "{{ _.member_id }}",
+          "disabled": true,
+          "description": "Filtra ministérios liderados por este Member."
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_details",
+      "parentId": "fld_ministry",
+      "modified": 1757000000046,
+      "created": 1757000000047,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}",
+      "name": "Get Ministry",
+      "description": "Retorna um ministério pelo id. Requer apenas autenticação. 404 se não existir.",
+      "method": "GET",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 2000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_create",
+      "parentId": "fld_ministry",
+      "modified": 1757000000048,
+      "created": 1757000000049,
+      "url": "{{ _.base_url }}/ministries",
+      "name": "Create Ministry",
+      "description": "Cria um novo ministério (ex: \"Louvor\", \"Infantil\"). O nome deve ser único (`MINISTRY.NAME_ALREADY_EXISTS`, 400). `leaderId` é opcional e, se informado, deve ser o id de um Member existente (`MINISTRY.INVALID_LEADER`, 400 caso não exista). Requer role com level >= 40 (Secretaria+).",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"name\": \"Louvor\",\n  \"description\": \"Ministério de louvor e adoração\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 3000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_update",
+      "parentId": "fld_ministry",
+      "modified": 1757000000050,
+      "created": 1757000000051,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}",
+      "name": "Update Ministry",
+      "description": "Atualiza nome, descrição ou líder do ministério (envie `leaderId: null` para remover o líder). Requer role com level >= 40 (Secretaria+).",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"leaderId\": \"{{ _.member_id }}\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 4000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_delete",
+      "parentId": "fld_ministry",
+      "modified": 1757000000052,
+      "created": 1757000000053,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}",
+      "name": "Delete Ministry",
+      "description": "Remove um ministério e todas as participações (MemberMinistry) associadas a ele (ON DELETE CASCADE). Requer role com level >= 40 (Secretaria+).",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_member_list",
+      "parentId": "fld_ministry",
+      "modified": 1757000000054,
+      "created": 1757000000055,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}/members",
+      "name": "List Ministry Participants",
+      "description": "Lista os membros que participam deste ministério, com `memberName` já resolvido via join. Filtro opcional por role. Requer apenas autenticação.",
+      "method": "GET",
+      "body": {},
+      "parameters": [
+        {
+          "name": "page",
+          "value": "1",
+          "disabled": true
+        },
+        {
+          "name": "limit",
+          "value": "20",
+          "disabled": true
+        },
+        {
+          "name": "role",
+          "value": "LEADER",
+          "disabled": true,
+          "description": "LEADER | MEMBER — filtra só líderes ou só participantes comuns."
+        }
+      ],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 6000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_member_add",
+      "parentId": "fld_ministry",
+      "modified": 1757000000056,
+      "created": 1757000000057,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}/members",
+      "name": "Add Member to Ministry",
+      "description": "Registra a participação de um Member neste Ministry, com papel LEADER ou MEMBER (padrão: MEMBER). Requer role com level >= 40 (Secretaria+). Isto NÃO altera o `leaderId` \"oficial\" do ministério — para isso, use \"Update Ministry\".\n\n**Erro:** `MEMBER_MINISTRY.ALREADY_PARTICIPATING` (400) se o membro já participar.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"memberId\": \"{{ _.member_id }}\",\n  \"role\": \"LEADER\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 7000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_member_update_role",
+      "parentId": "fld_ministry",
+      "modified": 1757000000058,
+      "created": 1757000000059,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}/members/{{ _.member_id }}",
+      "name": "Update Participant Role",
+      "description": "Troca o papel (LEADER/MEMBER) de um participante já existente. 404 (`NOT_FOUND`) se o membro não participar do ministério. Requer role com level >= 40 (Secretaria+).",
+      "method": "PATCH",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"role\": \"MEMBER\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 8000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_ministry_member_remove",
+      "parentId": "fld_ministry",
+      "modified": 1757000000060,
+      "created": 1757000000061,
+      "url": "{{ _.base_url }}/ministries/{{ _.ministry_id }}/members/{{ _.member_id }}",
+      "name": "Remove Member from Ministry",
+      "description": "Remove a participação de um membro no ministério. 404 se ele não participar. Requer role com level >= 40 (Secretaria+).",
+      "method": "DELETE",
+      "body": {},
+      "parameters": [],
+      "headers": [],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 9000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    }
+  ]
+}
