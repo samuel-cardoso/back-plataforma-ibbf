@@ -7,5 +7,131 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Adicione modelos do domínio IBBF aqui. Repositories em src/infrastructure/prisma
-// são a única camada autorizada a conhecer o PrismaClient.
+// Modelo derivado do ERD "IBBF - Autenticação e Administração de Membros".
+// Subdomínios: Autenticação (Role, User, RefreshToken) e Membros (Member,
+// Family, Ministry, MemberMinistry).
+
+model Role {
+  id          String @id @default(uuid())
+  name        String @unique
+  level       Int
+  description String?
+  users       User[]
+
+  @@map("roles")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  roleId       String
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  role          Role           @relation(fields: [roleId], references: [id])
+  refreshTokens RefreshToken[]
+  member        Member?
+
+  @@index([roleId])
+  @@map("users")
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BLOCKED
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String    @unique
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  userAgent  String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Member {
+  id           String       @id @default(uuid())
+  userId       String?      @unique
+  familyId     String?
+  fullName     String
+  cpf          String?      @unique
+  birthDate    DateTime     @db.Date
+  phone        String?
+  address      String?
+  memberType   MemberType
+  memberStatus MemberStatus
+  joinedAt     DateTime     @db.Date
+  baptized     Boolean      @default(false)
+
+  user             User?            @relation(fields: [userId], references: [id])
+  family           Family?          @relation(fields: [familyId], references: [id])
+  ledMinistries    Ministry[]       @relation("MinistryLeader")
+  memberMinistries MemberMinistry[]
+
+  @@index([familyId])
+  @@map("members")
+}
+
+enum MemberType {
+  MEMBER
+  CONGREGANT
+  VISITOR
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  TRANSFERRED
+}
+
+model Family {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  members Member[]
+
+  @@map("families")
+}
+
+model Ministry {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  leaderId    String?
+  description String?
+
+  leader           Member?          @relation("MinistryLeader", fields: [leaderId], references: [id])
+  memberMinistries MemberMinistry[]
+
+  @@index([leaderId])
+  @@map("ministries")
+}
+
+model MemberMinistry {
+  id         String       @id @default(uuid())
+  memberId   String
+  ministryId String
+  role       MinistryRole
+  joinedAt   DateTime     @db.Date
+
+  member   Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  ministry Ministry @relation(fields: [ministryId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, ministryId])
+  @@index([ministryId])
+  @@map("member_ministries")
+}
+
+enum MinistryRole {
+  LEADER
+  MEMBER
+}
