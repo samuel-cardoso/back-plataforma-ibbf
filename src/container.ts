@@ -3,12 +3,18 @@ import { PrismaService } from './infrastructure/prisma/prisma.service';
 import { PrismaRoleRepository } from './infrastructure/prisma/prisma-role.repository';
 import { PrismaUserRepository } from './infrastructure/prisma/prisma-user.repository';
 import { PrismaMemberRepository } from './infrastructure/prisma/prisma-member.repository';
+import { PrismaFamilyRepository } from './infrastructure/prisma/prisma-family.repository';
+import { PrismaMinistryRepository } from './infrastructure/prisma/prisma-ministry.repository';
+import { PrismaMemberMinistryRepository } from './infrastructure/prisma/prisma-member-ministry.repository';
+
 import { HealthCheckController } from './usecases/system/health-check/health-check.controller';
 import { HealthCheckUseCase } from './usecases/system/health-check/health-check.usecase';
+
 import { UserRegisterController } from './usecases/auth/user-register/user-register.controller';
 import { UserRegisterUseCase } from './usecases/auth/user-register/user-register.usecase';
 import { UserLoginController } from './usecases/auth/user-login/user-login.controller';
 import { UserLoginUseCase } from './usecases/auth/user-login/user-login.usecase';
+
 import { MemberCreateController } from './usecases/member/member-create/member-create.controller';
 import { MemberCreateUseCase } from './usecases/member/member-create/member-create.usecase';
 import { MemberListController } from './usecases/member/member-list/member-list.controller';
@@ -20,6 +26,36 @@ import { MemberUpdateUseCase } from './usecases/member/member-update/member-upda
 import { MemberDeleteController } from './usecases/member/member-delete/member-delete.controller';
 import { MemberDeleteUseCase } from './usecases/member/member-delete/member-delete.usecase';
 
+import { FamilyCreateController } from './usecases/family/family-create/family-create.controller';
+import { FamilyCreateUseCase } from './usecases/family/family-create/family-create.usecase';
+import { FamilyListController } from './usecases/family/family-list/family-list.controller';
+import { FamilyListUseCase } from './usecases/family/family-list/family-list.usecase';
+import { FamilyDetailsController } from './usecases/family/family-details/family-details.controller';
+import { FamilyDetailsUseCase } from './usecases/family/family-details/family-details.usecase';
+import { FamilyUpdateController } from './usecases/family/family-update/family-update.controller';
+import { FamilyUpdateUseCase } from './usecases/family/family-update/family-update.usecase';
+import { FamilyDeleteController } from './usecases/family/family-delete/family-delete.controller';
+import { FamilyDeleteUseCase } from './usecases/family/family-delete/family-delete.usecase';
+
+import { MinistryCreateController } from './usecases/ministry/ministry-create/ministry-create.controller';
+import { MinistryCreateUseCase } from './usecases/ministry/ministry-create/ministry-create.usecase';
+import { MinistryListController } from './usecases/ministry/ministry-list/ministry-list.controller';
+import { MinistryListUseCase } from './usecases/ministry/ministry-list/ministry-list.usecase';
+import { MinistryDetailsController } from './usecases/ministry/ministry-details/ministry-details.controller';
+import { MinistryDetailsUseCase } from './usecases/ministry/ministry-details/ministry-details.usecase';
+import { MinistryUpdateController } from './usecases/ministry/ministry-update/ministry-update.controller';
+import { MinistryUpdateUseCase } from './usecases/ministry/ministry-update/ministry-update.usecase';
+import { MinistryDeleteController } from './usecases/ministry/ministry-delete/ministry-delete.controller';
+import { MinistryDeleteUseCase } from './usecases/ministry/ministry-delete/ministry-delete.usecase';
+import { MinistryMemberAddController } from './usecases/ministry/ministry-member-add/ministry-member-add.controller';
+import { MinistryMemberAddUseCase } from './usecases/ministry/ministry-member-add/ministry-member-add.usecase';
+import { MinistryMemberListController } from './usecases/ministry/ministry-member-list/ministry-member-list.controller';
+import { MinistryMemberListUseCase } from './usecases/ministry/ministry-member-list/ministry-member-list.usecase';
+import { MinistryMemberUpdateRoleController } from './usecases/ministry/ministry-member-update-role/ministry-member-update-role.controller';
+import { MinistryMemberUpdateRoleUseCase } from './usecases/ministry/ministry-member-update-role/ministry-member-update-role.usecase';
+import { MinistryMemberRemoveController } from './usecases/ministry/ministry-member-remove/ministry-member-remove.controller';
+import { MinistryMemberRemoveUseCase } from './usecases/ministry/ministry-member-remove/ministry-member-remove.usecase';
+
 export const container = createContainer({ injectionMode: InjectionMode.PROXY });
 
 container.register({
@@ -29,6 +65,9 @@ container.register({
   roleRepository: asClass(PrismaRoleRepository, { lifetime: Lifetime.SINGLETON }),
   userRepository: asClass(PrismaUserRepository, { lifetime: Lifetime.SINGLETON }),
   memberRepository: asClass(PrismaMemberRepository, { lifetime: Lifetime.SINGLETON }),
+  familyRepository: asClass(PrismaFamilyRepository, { lifetime: Lifetime.SINGLETON }),
+  ministryRepository: asClass(PrismaMinistryRepository, { lifetime: Lifetime.SINGLETON }),
+  memberMinistryRepository: asClass(PrismaMemberMinistryRepository, { lifetime: Lifetime.SINGLETON }),
 
   healthCheckUseCase: asClass(HealthCheckUseCase, { lifetime: Lifetime.SCOPED }),
   healthCheckController: asClass(HealthCheckController, { lifetime: Lifetime.SCOPED }),
@@ -48,4 +87,34 @@ container.register({
   memberUpdateController: asClass(MemberUpdateController, { lifetime: Lifetime.SCOPED }),
   memberDeleteUseCase: asClass(MemberDeleteUseCase, { lifetime: Lifetime.SCOPED }),
   memberDeleteController: asClass(MemberDeleteController, { lifetime: Lifetime.SCOPED }),
+
+  familyCreateUseCase: asClass(FamilyCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  familyCreateController: asClass(FamilyCreateController, { lifetime: Lifetime.SCOPED }),
+  familyListUseCase: asClass(FamilyListUseCase, { lifetime: Lifetime.SCOPED }),
+  familyListController: asClass(FamilyListController, { lifetime: Lifetime.SCOPED }),
+  familyDetailsUseCase: asClass(FamilyDetailsUseCase, { lifetime: Lifetime.SCOPED }),
+  familyDetailsController: asClass(FamilyDetailsController, { lifetime: Lifetime.SCOPED }),
+  familyUpdateUseCase: asClass(FamilyUpdateUseCase, { lifetime: Lifetime.SCOPED }),
+  familyUpdateController: asClass(FamilyUpdateController, { lifetime: Lifetime.SCOPED }),
+  familyDeleteUseCase: asClass(FamilyDeleteUseCase, { lifetime: Lifetime.SCOPED }),
+  familyDeleteController: asClass(FamilyDeleteController, { lifetime: Lifetime.SCOPED }),
+
+  ministryCreateUseCase: asClass(MinistryCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryCreateController: asClass(MinistryCreateController, { lifetime: Lifetime.SCOPED }),
+  ministryListUseCase: asClass(MinistryListUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryListController: asClass(MinistryListController, { lifetime: Lifetime.SCOPED }),
+  ministryDetailsUseCase: asClass(MinistryDetailsUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryDetailsController: asClass(MinistryDetailsController, { lifetime: Lifetime.SCOPED }),
+  ministryUpdateUseCase: asClass(MinistryUpdateUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryUpdateController: asClass(MinistryUpdateController, { lifetime: Lifetime.SCOPED }),
+  ministryDeleteUseCase: asClass(MinistryDeleteUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryDeleteController: asClass(MinistryDeleteController, { lifetime: Lifetime.SCOPED }),
+  ministryMemberAddUseCase: asClass(MinistryMemberAddUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryMemberAddController: asClass(MinistryMemberAddController, { lifetime: Lifetime.SCOPED }),
+  ministryMemberListUseCase: asClass(MinistryMemberListUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryMemberListController: asClass(MinistryMemberListController, { lifetime: Lifetime.SCOPED }),
+  ministryMemberUpdateRoleUseCase: asClass(MinistryMemberUpdateRoleUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryMemberUpdateRoleController: asClass(MinistryMemberUpdateRoleController, { lifetime: Lifetime.SCOPED }),
+  ministryMemberRemoveUseCase: asClass(MinistryMemberRemoveUseCase, { lifetime: Lifetime.SCOPED }),
+  ministryMemberRemoveController: asClass(MinistryMemberRemoveController, { lifetime: Lifetime.SCOPED }),
 });
