@@ -1,0 +1,11 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Adicione modelos do domínio IBBF aqui. Repositories em src/infrastructure/prisma
+// são a única camada autorizada a conhecer o PrismaClient.
