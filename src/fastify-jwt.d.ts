@@ -6,6 +6,8 @@ export interface TokenPayload {
   sub: string;
   email: string;
   roleId: string;
+  /** ISO string de quando o email foi confirmado (POST /auth/verify-email), ou null. Não é checado pelo backend — só alimenta decisão de UI no front. */
+  emailVerifiedAt: string | null;
   iat: number;
 }
 

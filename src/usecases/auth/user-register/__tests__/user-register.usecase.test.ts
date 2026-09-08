@@ -50,7 +50,8 @@ describe('UserRegisterUseCase', () => {
   });
 
   it('cria o usuário com a role padrão, assina o token e envia o código de verificação por email', async () => {
-    const result = await usecase.execute(makeInput());
+    const input = makeInput();
+    const result = await usecase.execute(input);
 
     expect(deps.userRepository.create).toHaveBeenCalledTimes(1);
     expect(result.user.email).toBe('maria@example.com');
@@ -64,6 +65,9 @@ describe('UserRegisterUseCase', () => {
       to: 'maria@example.com',
       code: expect.stringMatching(/^\d{6}$/),
     });
+
+    // Recém-criado, então o JWT sai com emailVerifiedAt: null (front usa isso pra decidir redirecionar ou não).
+    expect(input.jwtSign).toHaveBeenCalledWith(expect.objectContaining({ emailVerifiedAt: null }));
   });
 
   it('conclui o registro e devolve os tokens mesmo se o envio do email de verificação falhar', async () => {

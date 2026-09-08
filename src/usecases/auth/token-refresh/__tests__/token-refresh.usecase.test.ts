@@ -27,7 +27,13 @@ function makeDeps() {
       findByEmail: vi.fn(),
       create: vi.fn(),
       updateLastLogin: vi.fn(),
-      findById: vi.fn().mockResolvedValue({ id: 'user-1', email: 'maria@example.com', roleId: 'role-1', status: 'ACTIVE' }),
+      findById: vi.fn().mockResolvedValue({
+        id: 'user-1',
+        email: 'maria@example.com',
+        roleId: 'role-1',
+        status: 'ACTIVE',
+        emailVerifiedAt: new Date('2026-01-01T00:00:00.000Z'),
+      }),
     },
   };
 }
@@ -50,6 +56,9 @@ describe('TokenRefreshUseCase', () => {
     expect(deps.refreshTokenRepository.create).toHaveBeenCalledTimes(1);
     expect(result.accessToken).toBe('new-jwt-token');
     expect(result.refreshToken).not.toBe(RAW_TOKEN);
+    expect(jwtSign).toHaveBeenCalledWith(
+      expect.objectContaining({ emailVerifiedAt: '2026-01-01T00:00:00.000Z' }),
+    );
   });
 
   it('rejeita com AUTH.INVALID_REFRESH_TOKEN se o token não existe', async () => {

@@ -66,7 +66,12 @@ export class UserRegisterUseCase {
     });
     await this.dependencies.refreshTokenRepository.create(refreshToken);
 
-    const accessToken = await input.jwtSign({ sub: created.id, email: created.email, roleId: created.roleId });
+    const accessToken = await input.jwtSign({
+      sub: created.id,
+      email: created.email,
+      roleId: created.roleId,
+      emailVerifiedAt: created.emailVerifiedAt ? created.emailVerifiedAt.toISOString() : null,
+    });
 
     return { user: created, accessToken, refreshToken: refreshTokenRaw };
   }

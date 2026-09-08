@@ -39,7 +39,12 @@ export class TokenRefreshUseCase {
     });
     await this.dependencies.refreshTokenRepository.create(rotated);
 
-    const accessToken = await input.jwtSign({ sub: user.id, email: user.email, roleId: user.roleId });
+    const accessToken = await input.jwtSign({
+      sub: user.id,
+      email: user.email,
+      roleId: user.roleId,
+      emailVerifiedAt: user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : null,
+    });
 
     return { accessToken, refreshToken: raw };
   }

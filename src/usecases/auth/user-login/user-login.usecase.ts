@@ -38,7 +38,12 @@ export class UserLoginUseCase {
     });
     await this.dependencies.refreshTokenRepository.create(refreshToken);
 
-    const accessToken = await input.jwtSign({ sub: user.id, email: user.email, roleId: user.roleId });
+    const accessToken = await input.jwtSign({
+      sub: user.id,
+      email: user.email,
+      roleId: user.roleId,
+      emailVerifiedAt: user.emailVerifiedAt ? user.emailVerifiedAt.toISOString() : null,
+    });
 
     return { user, accessToken, refreshToken: raw };
   }
