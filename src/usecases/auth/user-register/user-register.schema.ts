@@ -14,6 +14,7 @@ export const userRegisterResponseSchema = z.object({
       roleId: z.string(),
       status: z.enum(['ACTIVE', 'INACTIVE', 'BLOCKED']),
       lastLoginAt: z.string().datetime().nullable(),
+      emailVerifiedAt: z.string().datetime().nullable().describe('Preenchido depois de POST /auth/verify-email. Não bloqueia login.'),
       createdAt: z.string().datetime(),
     }),
     accessToken: z.string().describe('JWT de curta duração, enviado em `Authorization: Bearer <token>`.'),

@@ -36,6 +36,10 @@ export class PrismaUserRepository implements UserRepositoryPort {
     await this.dependencies.prismaService.client.user.update({ where: { id }, data: { passwordHash } });
   }
 
+  async updateEmailVerifiedAt(id: string, when: Date): Promise<void> {
+    await this.dependencies.prismaService.client.user.update({ where: { id }, data: { emailVerifiedAt: when } });
+  }
+
   /** Converte a linha crua do Prisma para a entidade de domínio. */
   private toEntity(row: {
     id: string;
@@ -44,6 +48,7 @@ export class PrismaUserRepository implements UserRepositoryPort {
     roleId: string;
     status: UserProps['status'];
     lastLoginAt: Date | null;
+    emailVerifiedAt: Date | null;
     createdAt: Date;
   }): User {
     return User.restore({ ...row });

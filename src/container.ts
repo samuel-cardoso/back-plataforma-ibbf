@@ -4,6 +4,7 @@ import { PrismaRoleRepository } from './infrastructure/prisma/prisma-role.reposi
 import { PrismaUserRepository } from './infrastructure/prisma/prisma-user.repository';
 import { PrismaRefreshTokenRepository } from './infrastructure/prisma/prisma-refresh-token.repository';
 import { PrismaPasswordResetCodeRepository } from './infrastructure/prisma/prisma-password-reset-code.repository';
+import { PrismaEmailVerificationCodeRepository } from './infrastructure/prisma/prisma-email-verification-code.repository';
 import { ResendMailerService } from './infrastructure/mail/resend-mailer.service';
 import { PrismaMemberRepository } from './infrastructure/prisma/prisma-member.repository';
 import { PrismaFamilyRepository } from './infrastructure/prisma/prisma-family.repository';
@@ -27,6 +28,10 @@ import { ForgotPasswordController } from './usecases/auth/forgot-password/forgot
 import { ForgotPasswordUseCase } from './usecases/auth/forgot-password/forgot-password.usecase';
 import { ResetPasswordController } from './usecases/auth/reset-password/reset-password.controller';
 import { ResetPasswordUseCase } from './usecases/auth/reset-password/reset-password.usecase';
+import { VerifyEmailController } from './usecases/auth/verify-email/verify-email.controller';
+import { VerifyEmailUseCase } from './usecases/auth/verify-email/verify-email.usecase';
+import { ResendVerificationController } from './usecases/auth/resend-verification/resend-verification.controller';
+import { ResendVerificationUseCase } from './usecases/auth/resend-verification/resend-verification.usecase';
 
 import { MemberCreateController } from './usecases/member/member-create/member-create.controller';
 import { MemberCreateUseCase } from './usecases/member/member-create/member-create.usecase';
@@ -79,6 +84,7 @@ container.register({
   userRepository: asClass(PrismaUserRepository, { lifetime: Lifetime.SINGLETON }),
   refreshTokenRepository: asClass(PrismaRefreshTokenRepository, { lifetime: Lifetime.SINGLETON }),
   passwordResetCodeRepository: asClass(PrismaPasswordResetCodeRepository, { lifetime: Lifetime.SINGLETON }),
+  emailVerificationCodeRepository: asClass(PrismaEmailVerificationCodeRepository, { lifetime: Lifetime.SINGLETON }),
   mailerService: asClass(ResendMailerService, { lifetime: Lifetime.SINGLETON }),
   memberRepository: asClass(PrismaMemberRepository, { lifetime: Lifetime.SINGLETON }),
   familyRepository: asClass(PrismaFamilyRepository, { lifetime: Lifetime.SINGLETON }),
@@ -102,6 +108,10 @@ container.register({
   forgotPasswordController: asClass(ForgotPasswordController, { lifetime: Lifetime.SCOPED }),
   resetPasswordUseCase: asClass(ResetPasswordUseCase, { lifetime: Lifetime.SCOPED }),
   resetPasswordController: asClass(ResetPasswordController, { lifetime: Lifetime.SCOPED }),
+  verifyEmailUseCase: asClass(VerifyEmailUseCase, { lifetime: Lifetime.SCOPED }),
+  verifyEmailController: asClass(VerifyEmailController, { lifetime: Lifetime.SCOPED }),
+  resendVerificationUseCase: asClass(ResendVerificationUseCase, { lifetime: Lifetime.SCOPED }),
+  resendVerificationController: asClass(ResendVerificationController, { lifetime: Lifetime.SCOPED }),
 
   memberCreateUseCase: asClass(MemberCreateUseCase, { lifetime: Lifetime.SCOPED }),
   memberCreateController: asClass(MemberCreateController, { lifetime: Lifetime.SCOPED }),

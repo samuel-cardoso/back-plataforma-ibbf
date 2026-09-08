@@ -93,11 +93,11 @@
     {
       "_id": "req_auth_register",
       "parentId": "fld_auth",
-      "modified": 1757000000010,
+      "modified": 1757000000024,
       "created": 1757000000011,
       "url": "{{ _.base_url }}/auth/register",
       "name": "Register",
-      "description": "Cria uma conta de login (User) com a role padrão \"Membro\" e devolve um par accessToken/refreshToken já autenticado.\n\n**Erros:** `USER.EMAIL_ALREADY_EXISTS` (400) se o email já estiver em uso; `USER.INVALID_EMAIL` / `USER.INVALID_PASSWORD` (400) para dados inválidos (senha precisa ter ao menos 6 caracteres).\n\nDepois de rodar, copie `data.accessToken` e `data.refreshToken` para as variáveis de ambiente `access_token`/`refresh_token`.",
+      "description": "Cria uma conta de login (User) com a role padrão \"Membro\" e devolve um par accessToken/refreshToken já autenticado (auto-login, não exige confirmação de email antes). Em paralelo, envia por email um código de 6 dígitos que pode ser confirmado em POST /auth/verify-email — isso só marca `emailVerifiedAt` no perfil, não é obrigatório para logar.\n\n**Erros:** `USER.EMAIL_ALREADY_EXISTS` (400) se o email já estiver em uso; `USER.INVALID_EMAIL` / `USER.INVALID_PASSWORD` (400) para dados inválidos (senha precisa ter ao menos 6 caracteres).\n\nDepois de rodar, copie `data.accessToken` e `data.refreshToken` para as variáveis de ambiente `access_token`/`refresh_token`.",
       "method": "POST",
       "body": {
         "mimeType": "application/json",
@@ -112,6 +112,68 @@
       ],
       "authentication": {},
       "metaSortKey": 1000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_verify_email",
+      "parentId": "fld_auth",
+      "modified": 1757000000031,
+      "created": 1757000000030,
+      "url": "{{ _.base_url }}/auth/verify-email",
+      "name": "Verify Email",
+      "description": "Confirma o código de 6 dígitos enviado por POST /auth/register ou POST /auth/resend-verification, marcando `emailVerifiedAt` no perfil do usuário. Não afeta login nem emite tokens — é só um selo de confiança extra.\n\n**Erros:** `AUTH.INVALID_VERIFICATION_CODE` (400) para email inexistente, código incorreto, já usado ou expirado (mesma mensagem em todos os casos); `AUTH.EMAIL_ALREADY_VERIFIED` (400) se o email já tinha sido confirmado antes.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\",\n  \"code\": \"123456\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1500,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_resend_verification",
+      "parentId": "fld_auth",
+      "modified": 1757000000033,
+      "created": 1757000000032,
+      "url": "{{ _.base_url }}/auth/resend-verification",
+      "name": "Resend Verification",
+      "description": "Gera e envia um novo código de 6 dígitos para confirmar o email, caso o código de POST /auth/register tenha expirado (validade de 30 minutos) ou se perdido. Sempre responde 200 com uma mensagem genérica, mesmo se o email não estiver cadastrado ou já tiver sido verificado.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 1600,
       "isPrivate": false,
       "settingStoreCookies": true,
       "settingSendCookies": true,

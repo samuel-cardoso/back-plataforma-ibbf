@@ -10,6 +10,7 @@ export type UserProps = {
   roleId: string;
   status: UserStatus;
   lastLoginAt: Date | null;
+  emailVerifiedAt: Date | null;
   createdAt: Date;
 };
 
@@ -36,6 +37,7 @@ export class User {
       roleId: props.roleId,
       status: 'ACTIVE',
       lastLoginAt: null,
+      emailVerifiedAt: null,
       createdAt: props.now ?? new Date(),
     });
   }
@@ -58,6 +60,7 @@ export class User {
   get roleId() { return this.props.roleId; }
   get status() { return this.props.status; }
   get lastLoginAt() { return this.props.lastLoginAt; }
+  get emailVerifiedAt() { return this.props.emailVerifiedAt; }
   get createdAt() { return this.props.createdAt; }
 
   async comparePassword(plainTextPassword: string): Promise<boolean> {
@@ -72,6 +75,11 @@ export class User {
     this.props.passwordHash = passwordHash;
   }
 
+  /** Não afeta login/status — é só um selo informativo de que o email foi confirmado. */
+  markEmailVerified(when: Date = new Date()) {
+    this.props.emailVerifiedAt = when;
+  }
+
   /** Nunca inclui passwordHash — é isso que o controller deve devolver ao cliente. */
   toJSON() {
     return {
@@ -80,6 +88,7 @@ export class User {
       roleId: this.props.roleId,
       status: this.props.status,
       lastLoginAt: this.props.lastLoginAt ? this.props.lastLoginAt.toISOString() : null,
+      emailVerifiedAt: this.props.emailVerifiedAt ? this.props.emailVerifiedAt.toISOString() : null,
       createdAt: this.props.createdAt.toISOString(),
     };
   }

@@ -15,3 +15,6 @@ export const REFRESH_TOKEN_TTL_DAYS = 30;
 
 /** Validade do código de 6 dígitos emitido em /auth/forgot-password. */
 export const PASSWORD_RESET_CODE_TTL_MINUTES = 15;
+
+/** Validade do código de 6 dígitos emitido em /auth/register e /auth/resend-verification. */
+export const EMAIL_VERIFICATION_CODE_TTL_MINUTES = 30;

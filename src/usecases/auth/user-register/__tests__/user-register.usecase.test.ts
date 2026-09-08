@@ -9,6 +9,7 @@ function makeDeps() {
       create: vi.fn().mockImplementation(async (user) => user),
       findById: vi.fn(),
       updateLastLogin: vi.fn(),
+      updatePassword: vi.fn(),
     },
     roleRepository: {
       findByName: vi.fn().mockResolvedValue({ id: 'role-membro', name: 'Membro', level: 20, description: null }),
@@ -17,6 +18,15 @@ function makeDeps() {
       create: vi.fn().mockImplementation(async (refreshToken) => refreshToken),
       findByTokenHash: vi.fn(),
       update: vi.fn(),
+    },
+    emailVerificationCodeRepository: {
+      create: vi.fn().mockImplementation(async (code) => code),
+      findValidByUserAndCodeHash: vi.fn(),
+      update: vi.fn(),
+    },
+    mailerService: {
+      sendPasswordResetCode: vi.fn().mockResolvedValue(undefined),
+      sendEmailVerificationCode: vi.fn().mockResolvedValue(undefined),
     },
   };
 }
@@ -39,7 +49,7 @@ describe('UserRegisterUseCase', () => {
     usecase = new UserRegisterUseCase(deps as never);
   });
 
-  it('cria o usuário com a role padrão e assina o token quando o email ainda não existe', async () => {
+  it('cria o usuário com a role padrão, assina o token e envia o código de verificação por email', async () => {
     const result = await usecase.execute(makeInput());
 
     expect(deps.userRepository.create).toHaveBeenCalledTimes(1);
@@ -47,6 +57,21 @@ describe('UserRegisterUseCase', () => {
     expect(result.user.roleId).toBe('role-membro');
     expect(result.accessToken).toBe('fake-jwt-token');
     expect(deps.refreshTokenRepository.create).toHaveBeenCalledTimes(1);
+    expect(result.refreshToken).toEqual(expect.any(String));
+
+    expect(deps.emailVerificationCodeRepository.create).toHaveBeenCalledTimes(1);
+    expect(deps.mailerService.sendEmailVerificationCode).toHaveBeenCalledWith({
+      to: 'maria@example.com',
+      code: expect.stringMatching(/^\d{6}$/),
+    });
+  });
+
+  it('conclui o registro e devolve os tokens mesmo se o envio do email de verificação falhar', async () => {
+    deps.mailerService.sendEmailVerificationCode.mockRejectedValueOnce(new Error('Resend indisponível'));
+
+    const result = await usecase.execute(makeInput());
+
+    expect(result.accessToken).toBe('fake-jwt-token');
     expect(result.refreshToken).toEqual(expect.any(String));
   });
 
@@ -57,6 +82,7 @@ describe('UserRegisterUseCase', () => {
       code: 'USER.EMAIL_ALREADY_EXISTS',
     });
     expect(deps.userRepository.create).not.toHaveBeenCalled();
+    expect(deps.mailerService.sendEmailVerificationCode).not.toHaveBeenCalled();
   });
 
   it('nunca grava a senha em texto puro (o hash é feito por User.create)', async () => {

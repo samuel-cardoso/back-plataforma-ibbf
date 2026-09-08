@@ -12,8 +12,8 @@ datasource db {
 // Family, Ministry, MemberMinistry).
 
 model Role {
-  id          String @id @default(uuid())
-  name        String @unique
+  id          String  @id @default(uuid())
+  name        String  @unique
   level       Int
   description String?
   users       User[]
@@ -22,18 +22,20 @@ model Role {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  passwordHash String
-  roleId       String
-  status       UserStatus @default(ACTIVE)
-  lastLoginAt  DateTime?
-  createdAt    DateTime  @default(now())
+  id              String     @id @default(uuid())
+  email           String     @unique
+  passwordHash    String
+  roleId          String
+  status          UserStatus @default(ACTIVE)
+  lastLoginAt     DateTime?
+  emailVerifiedAt DateTime?
+  createdAt       DateTime   @default(now())
 
-  role               Role                @relation(fields: [roleId], references: [id])
-  refreshTokens      RefreshToken[]
-  passwordResetCodes PasswordResetCode[]
-  member             Member?
+  role                   Role                    @relation(fields: [roleId], references: [id])
+  refreshTokens          RefreshToken[]
+  passwordResetCodes     PasswordResetCode[]
+  emailVerificationCodes EmailVerificationCode[]
+  member                 Member?
 
   @@index([roleId])
   @@map("users")
@@ -46,12 +48,12 @@ enum UserStatus {
 }
 
 model RefreshToken {
-  id         String    @id @default(uuid())
-  userId     String
-  tokenHash  String    @unique
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  userAgent  String?
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -71,6 +73,20 @@ model PasswordResetCode {
 
   @@index([userId])
   @@map("password_reset_codes")
+}
+
+model EmailVerificationCode {
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verification_codes")
 }
 
 model Member {
