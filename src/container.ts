@@ -3,6 +3,8 @@ import { PrismaService } from './infrastructure/prisma/prisma.service';
 import { PrismaRoleRepository } from './infrastructure/prisma/prisma-role.repository';
 import { PrismaUserRepository } from './infrastructure/prisma/prisma-user.repository';
 import { PrismaRefreshTokenRepository } from './infrastructure/prisma/prisma-refresh-token.repository';
+import { PrismaPasswordResetCodeRepository } from './infrastructure/prisma/prisma-password-reset-code.repository';
+import { ResendMailerService } from './infrastructure/mail/resend-mailer.service';
 import { PrismaMemberRepository } from './infrastructure/prisma/prisma-member.repository';
 import { PrismaFamilyRepository } from './infrastructure/prisma/prisma-family.repository';
 import { PrismaMinistryRepository } from './infrastructure/prisma/prisma-ministry.repository';
@@ -19,6 +21,12 @@ import { TokenRefreshController } from './usecases/auth/token-refresh/token-refr
 import { TokenRefreshUseCase } from './usecases/auth/token-refresh/token-refresh.usecase';
 import { LogoutController } from './usecases/auth/logout/logout.controller';
 import { LogoutUseCase } from './usecases/auth/logout/logout.usecase';
+import { ChangePasswordController } from './usecases/auth/change-password/change-password.controller';
+import { ChangePasswordUseCase } from './usecases/auth/change-password/change-password.usecase';
+import { ForgotPasswordController } from './usecases/auth/forgot-password/forgot-password.controller';
+import { ForgotPasswordUseCase } from './usecases/auth/forgot-password/forgot-password.usecase';
+import { ResetPasswordController } from './usecases/auth/reset-password/reset-password.controller';
+import { ResetPasswordUseCase } from './usecases/auth/reset-password/reset-password.usecase';
 
 import { MemberCreateController } from './usecases/member/member-create/member-create.controller';
 import { MemberCreateUseCase } from './usecases/member/member-create/member-create.usecase';
@@ -70,6 +78,8 @@ container.register({
   roleRepository: asClass(PrismaRoleRepository, { lifetime: Lifetime.SINGLETON }),
   userRepository: asClass(PrismaUserRepository, { lifetime: Lifetime.SINGLETON }),
   refreshTokenRepository: asClass(PrismaRefreshTokenRepository, { lifetime: Lifetime.SINGLETON }),
+  passwordResetCodeRepository: asClass(PrismaPasswordResetCodeRepository, { lifetime: Lifetime.SINGLETON }),
+  mailerService: asClass(ResendMailerService, { lifetime: Lifetime.SINGLETON }),
   memberRepository: asClass(PrismaMemberRepository, { lifetime: Lifetime.SINGLETON }),
   familyRepository: asClass(PrismaFamilyRepository, { lifetime: Lifetime.SINGLETON }),
   ministryRepository: asClass(PrismaMinistryRepository, { lifetime: Lifetime.SINGLETON }),
@@ -86,6 +96,12 @@ container.register({
   tokenRefreshController: asClass(TokenRefreshController, { lifetime: Lifetime.SCOPED }),
   logoutUseCase: asClass(LogoutUseCase, { lifetime: Lifetime.SCOPED }),
   logoutController: asClass(LogoutController, { lifetime: Lifetime.SCOPED }),
+  changePasswordUseCase: asClass(ChangePasswordUseCase, { lifetime: Lifetime.SCOPED }),
+  changePasswordController: asClass(ChangePasswordController, { lifetime: Lifetime.SCOPED }),
+  forgotPasswordUseCase: asClass(ForgotPasswordUseCase, { lifetime: Lifetime.SCOPED }),
+  forgotPasswordController: asClass(ForgotPasswordController, { lifetime: Lifetime.SCOPED }),
+  resetPasswordUseCase: asClass(ResetPasswordUseCase, { lifetime: Lifetime.SCOPED }),
+  resetPasswordController: asClass(ResetPasswordController, { lifetime: Lifetime.SCOPED }),
 
   memberCreateUseCase: asClass(MemberCreateUseCase, { lifetime: Lifetime.SCOPED }),
   memberCreateController: asClass(MemberCreateController, { lifetime: Lifetime.SCOPED }),

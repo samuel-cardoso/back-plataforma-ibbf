@@ -32,6 +32,10 @@ export class PrismaUserRepository implements UserRepositoryPort {
     await this.dependencies.prismaService.client.user.update({ where: { id }, data: { lastLoginAt: when } });
   }
 
+  async updatePassword(id: string, passwordHash: string): Promise<void> {
+    await this.dependencies.prismaService.client.user.update({ where: { id }, data: { passwordHash } });
+  }
+
   /** Converte a linha crua do Prisma para a entidade de domínio. */
   private toEntity(row: {
     id: string;

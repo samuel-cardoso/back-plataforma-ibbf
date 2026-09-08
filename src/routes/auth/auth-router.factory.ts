@@ -7,6 +7,12 @@ import type { TokenRefreshController } from '@/usecases/auth/token-refresh/token
 import { tokenRefreshSchema, tokenRefreshResponseSchema, tokenRefreshErrorSchema } from '@/usecases/auth/token-refresh/token-refresh.schema';
 import type { LogoutController } from '@/usecases/auth/logout/logout.controller';
 import { logoutSchema, logoutResponseSchema } from '@/usecases/auth/logout/logout.schema';
+import type { ChangePasswordController } from '@/usecases/auth/change-password/change-password.controller';
+import { changePasswordSchema, changePasswordResponseSchema, changePasswordErrorSchema } from '@/usecases/auth/change-password/change-password.schema';
+import type { ForgotPasswordController } from '@/usecases/auth/forgot-password/forgot-password.controller';
+import { forgotPasswordSchema, forgotPasswordResponseSchema } from '@/usecases/auth/forgot-password/forgot-password.schema';
+import type { ResetPasswordController } from '@/usecases/auth/reset-password/reset-password.controller';
+import { resetPasswordSchema, resetPasswordResponseSchema, resetPasswordErrorSchema } from '@/usecases/auth/reset-password/reset-password.schema';
 
 /** Rotas públicas (sem `authenticate()`): é aqui que o par access/refresh token nasce, se renova e morre. */
 export async function authRoutes(server: FastifyInstance) {
@@ -63,6 +69,55 @@ export async function authRoutes(server: FastifyInstance) {
     },
   }, async (request, reply) => {
     const controller = request.diScope.resolve<LogoutController>('logoutController');
+    return controller.handle(request, reply);
+  });
+
+  server.post('/change-password', {
+    preHandler: [server.authenticate()],
+    schema: {
+      tags: ['Auth'],
+      summary: 'Change the password of the authenticated user',
+      description:
+        'Troca a senha do usuário autenticado, exigindo a senha atual. Falha com `AUTH.INVALID_CURRENT_PASSWORD` ' +
+        'se `currentPassword` não conferir com a senha em vigor.',
+      security: [{ bearerAuth: [] }],
+      body: changePasswordSchema,
+      response: { 200: changePasswordResponseSchema, 400: changePasswordErrorSchema },
+    },
+  }, async (request, reply) => {
+    const controller = request.diScope.resolve<ChangePasswordController>('changePasswordController');
+    return controller.handle(request, reply);
+  });
+
+  server.post('/forgot-password', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Request a password reset code by email',
+      description:
+        'Envia por email (via Resend) um código de 6 dígitos, válido por 15 minutos, para trocar a senha em ' +
+        '`POST /auth/reset-password`. Sempre responde 200 com uma mensagem genérica, mesmo se o email não estiver ' +
+        'cadastrado ou o usuário não estiver ACTIVE — isso evita usar esta rota para descobrir quais emails existem.',
+      body: forgotPasswordSchema,
+      response: { 200: forgotPasswordResponseSchema },
+    },
+  }, async (request, reply) => {
+    const controller = request.diScope.resolve<ForgotPasswordController>('forgotPasswordController');
+    return controller.handle(request, reply);
+  });
+
+  server.post('/reset-password', {
+    schema: {
+      tags: ['Auth'],
+      summary: 'Reset the password using the code from /forgot-password',
+      description:
+        'Troca a senha usando o código de 6 dígitos enviado por `POST /auth/forgot-password`. O código só pode ser ' +
+        'usado uma vez e expira em 15 minutos. Falha com `AUTH.INVALID_RESET_CODE` para email inexistente, código ' +
+        'incorreto, já usado ou expirado — a mesma mensagem em todos os casos, para não revelar qual condição falhou.',
+      body: resetPasswordSchema,
+      response: { 200: resetPasswordResponseSchema, 400: resetPasswordErrorSchema },
+    },
+  }, async (request, reply) => {
+    const controller = request.diScope.resolve<ResetPasswordController>('resetPasswordController');
     return controller.handle(request, reply);
   });
 }

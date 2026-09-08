@@ -27,11 +27,7 @@ export class User {
       throw new DomainError('Email inválido', 'USER.INVALID_EMAIL');
     }
 
-    if (!props.password || props.password.length < 6) {
-      throw new DomainError('Senha deve ter ao menos 6 caracteres', 'USER.INVALID_PASSWORD');
-    }
-
-    const passwordHash = await bcrypt.hash(props.password, 10);
+    const passwordHash = await User.hashPassword(props.password);
 
     return new User({
       id: null,
@@ -49,6 +45,13 @@ export class User {
     return new User({ ...props });
   }
 
+  static async hashPassword(plainTextPassword: string): Promise<string> {
+    if (!plainTextPassword || plainTextPassword.length < 6) {
+      throw new DomainError('Senha deve ter ao menos 6 caracteres', 'USER.INVALID_PASSWORD');
+    }
+    return bcrypt.hash(plainTextPassword, 10);
+  }
+
   get id() { return this.props.id; }
   get email() { return this.props.email; }
   get passwordHash() { return this.props.passwordHash; }
@@ -63,6 +66,10 @@ export class User {
 
   recordLogin(when: Date = new Date()) {
     this.props.lastLoginAt = when;
+  }
+
+  changePassword(passwordHash: string) {
+    this.props.passwordHash = passwordHash;
   }
 
   /** Nunca inclui passwordHash — é isso que o controller deve devolver ao cliente. */

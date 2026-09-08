@@ -9,4 +9,5 @@ export interface UserRepositoryPort {
   findByEmail(email: string): Promise<User | null>;
   findById(id: string): Promise<User | null>;
   updateLastLogin(id: string, when: Date): Promise<void>;
+  updatePassword(id: string, passwordHash: string): Promise<void>;
 }

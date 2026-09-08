@@ -12,3 +12,6 @@ export const PAGINATION = {
 
 /** Validade de um refresh token emitido em /auth/login, /auth/register ou /auth/refresh. */
 export const REFRESH_TOKEN_TTL_DAYS = 30;
+
+/** Validade do código de 6 dígitos emitido em /auth/forgot-password. */
+export const PASSWORD_RESET_CODE_TTL_MINUTES = 15;

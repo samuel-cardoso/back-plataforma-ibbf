@@ -30,9 +30,10 @@ model User {
   lastLoginAt  DateTime?
   createdAt    DateTime  @default(now())
 
-  role          Role           @relation(fields: [roleId], references: [id])
-  refreshTokens RefreshToken[]
-  member        Member?
+  role               Role                @relation(fields: [roleId], references: [id])
+  refreshTokens      RefreshToken[]
+  passwordResetCodes PasswordResetCode[]
+  member             Member?
 
   @@index([roleId])
   @@map("users")
@@ -56,6 +57,20 @@ model RefreshToken {
 
   @@index([userId])
   @@map("refresh_tokens")
+}
+
+model PasswordResetCode {
+  id        String    @id @default(uuid())
+  userId    String
+  codeHash  String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_codes")
 }
 
 model Member {

@@ -215,6 +215,103 @@
       "_type": "request"
     },
     {
+      "_id": "req_auth_change_password",
+      "parentId": "fld_auth",
+      "modified": 1757000000019,
+      "created": 1757000000018,
+      "url": "{{ _.base_url }}/auth/change-password",
+      "name": "Change Password",
+      "description": "Troca a senha do usuário autenticado. Requer o header Authorization (Bearer access_token) e a senha atual.\n\n**Erros:** `AUTH.INVALID_CURRENT_PASSWORD` (400) se `currentPassword` não conferir; `USER.INVALID_PASSWORD` (400) se `newPassword` tiver menos de 6 caracteres.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"currentPassword\": \"senha123\",\n  \"newPassword\": \"novaSenha456\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {
+        "type": "bearer",
+        "token": "{{ _.access_token }}",
+        "prefix": "Bearer"
+      },
+      "metaSortKey": 5000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_forgot_password",
+      "parentId": "fld_auth",
+      "modified": 1757000000021,
+      "created": 1757000000020,
+      "url": "{{ _.base_url }}/auth/forgot-password",
+      "name": "Forgot Password",
+      "description": "Envia por email (Resend) um código de 6 dígitos, válido por 15 minutos, para trocar a senha em `POST /auth/reset-password`.\n\nSempre responde 200 com uma mensagem genérica, mesmo se o email não estiver cadastrado ou o usuário não estiver ACTIVE — não revela quais emails existem.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 6000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
+      "_id": "req_auth_reset_password",
+      "parentId": "fld_auth",
+      "modified": 1757000000023,
+      "created": 1757000000022,
+      "url": "{{ _.base_url }}/auth/reset-password",
+      "name": "Reset Password",
+      "description": "Troca a senha usando o código de 6 dígitos enviado por `POST /auth/forgot-password`. O código só pode ser usado uma vez e expira em 15 minutos.\n\n**Erros:** `AUTH.INVALID_RESET_CODE` (400) para email inexistente, código incorreto, já usado ou expirado — mesma mensagem em todos os casos.",
+      "method": "POST",
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"maria@example.com\",\n  \"code\": \"123456\",\n  \"newPassword\": \"novaSenha456\"\n}"
+      },
+      "parameters": [],
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "authentication": {},
+      "metaSortKey": 7000,
+      "isPrivate": false,
+      "settingStoreCookies": true,
+      "settingSendCookies": true,
+      "settingDisableRenderRequestBody": false,
+      "settingEncodeUrl": true,
+      "settingRebuildPath": true,
+      "settingFollowRedirects": "global",
+      "_type": "request"
+    },
+    {
       "_id": "fld_member",
       "parentId": "wrk_ibbf_api",
       "modified": 1757000000018,
