@@ -20,6 +20,7 @@
     "seed": "ts-node -r tsconfig-paths/register prisma/seed.ts"
   },
   "dependencies": {
+    "@samuel-cardoso/ibbf-authz": "^0.1.0",
     "@fastify/awilix": "^8.0.0",
     "@fastify/cors": "^11.0.0",
     "@fastify/jwt": "^10.0.0",

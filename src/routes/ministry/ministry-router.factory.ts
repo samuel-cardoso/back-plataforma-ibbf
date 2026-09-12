@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { STAFF_MIN_ROLE_LEVEL } from '@/shared/constants';
+import { STAFF_MIN_ROLE_LEVEL } from '@samuel-cardoso/ibbf-authz';
 import type { MinistryCreateController } from '@/usecases/ministry/ministry-create/ministry-create.controller';
 import { ministryCreateSchema, ministryCreateResponseSchema, ministryErrorSchema } from '@/usecases/ministry/ministry-create/ministry-create.schema';
 import type { MinistryListController } from '@/usecases/ministry/ministry-list/ministry-list.controller';

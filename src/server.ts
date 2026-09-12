@@ -5,6 +5,7 @@ import swaggerUi from '@fastify/swagger-ui';
 import { fastifyAwilixPlugin } from '@fastify/awilix';
 import fastify, { type FastifyError, type FastifyReply, type FastifyRequest, type onRequestHookHandler } from 'fastify';
 import { jsonSchemaTransform, serializerCompiler, validatorCompiler, ZodTypeProvider } from 'fastify-type-provider-zod';
+import { canAccess } from '@samuel-cardoso/ibbf-authz';
 import { container } from './container';
 import { registerRoutes } from './routes';
 import { DomainError, NotFoundError } from './shared/errors';
@@ -105,7 +106,7 @@ export async function createServer() {
       const roleRepository = request.diScope.resolve<RoleRepositoryPort>('roleRepository');
       const role = await roleRepository.findById(request.userEntity.roleId);
 
-      if (!role || role.level < minLevel) {
+      if (!canAccess(role, minLevel)) {
         return reply.status(403).send({ success: false, code: 'FORBIDDEN', message: 'Você não tem permissão para executar esta ação' });
       }
     };

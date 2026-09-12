@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { STAFF_MIN_ROLE_LEVEL } from '@/shared/constants';
+import { STAFF_MIN_ROLE_LEVEL } from '@samuel-cardoso/ibbf-authz';
 import type { FamilyCreateController } from '@/usecases/family/family-create/family-create.controller';
 import { familyCreateSchema, familyCreateResponseSchema, familyErrorSchema } from '@/usecases/family/family-create/family-create.schema';
 import type { FamilyListController } from '@/usecases/family/family-list/family-list.controller';
