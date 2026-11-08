@@ -1,0 +1,20 @@
+import type { z } from 'zod';
+import type { FastifyReply, FastifyRequest } from 'fastify';
+import type { FundListUseCase } from './fund-list.usecase';
+import type { fundListQuerySchema } from './fund-list.schema';
+
+interface Dependencies {
+  fundListUseCase: FundListUseCase;
+}
+
+export class FundListController {
+  constructor(private readonly dependencies: Dependencies) {}
+
+  async handle(request: FastifyRequest, reply: FastifyReply) {
+    const query = request.query as z.infer<typeof fundListQuerySchema>;
+
+    const items = await this.dependencies.fundListUseCase.execute(query);
+
+    return reply.status(200).send({ success: true, data: { funds: items.map((item) => item.toJSON()) } });
+  }
+}

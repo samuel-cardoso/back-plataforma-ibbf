@@ -9,7 +9,8 @@ import { canAccess } from '@samuel-cardoso/ibbf-authz';
 import { container } from './container';
 import { registerRoutes } from './routes';
 import { DomainError, NotFoundError } from './shared/errors';
-import type { RoleRepositoryPort, UserRepositoryPort } from './repositories';
+import type { RoleRepositoryPort, UserFinanceRoleRepositoryPort, UserRepositoryPort } from './repositories';
+import type { FinanceRoleName } from './models';
 import type { TokenPayload } from './fastify-jwt.d';
 
 function isFastifyError(error: unknown): error is FastifyError {
@@ -109,6 +110,23 @@ export async function createServer() {
       if (!canAccess(role, minLevel)) {
         return reply.status(403).send({ success: false, code: 'FORBIDDEN', message: 'Você não tem permissão para executar esta ação' });
       }
+    };
+  });
+
+  server.decorate('authorizeFinance', (allowedRoles: FinanceRoleName[]): onRequestHookHandler => {
+    return async (request: FastifyRequest, reply: FastifyReply) => {
+      if (!request.userEntity) {
+        return reply.status(401).send({ success: false, code: 'UNAUTHORIZED', message: 'Não autenticado' });
+      }
+
+      const financeRoleRepository = request.diScope.resolve<UserFinanceRoleRepositoryPort>('userFinanceRoleRepository');
+      const financeRole = await financeRoleRepository.findByUserId(request.userEntity.id as string);
+
+      if (!financeRole || !allowedRoles.includes(financeRole.role)) {
+        return reply.status(403).send({ success: false, code: 'FINANCE.FORBIDDEN', message: 'Você não tem acesso a esta área do financeiro' });
+      }
+
+      request.financeRole = financeRole;
     };
   });
 

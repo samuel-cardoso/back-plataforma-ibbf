@@ -1,6 +1,6 @@
 import 'fastify';
 import type { onRequestHookHandler } from 'fastify';
-import { User } from '@/models';
+import { User, UserFinanceRole, FinanceRoleName } from '@/models';
 
 export interface TokenPayload {
   sub: string;
@@ -21,11 +21,18 @@ declare module 'fastify' {
     user: TokenPayload;
     /** Usuário completo do banco, populado por `authenticate()`. */
     userEntity?: User;
+    /** Papel financeiro do usuário, populado por `authorizeFinance()`. */
+    financeRole?: UserFinanceRole;
   }
 
   export interface FastifyInstance {
     authenticate(): onRequestHookHandler;
     /** Deve vir depois de `authenticate()`. Bloqueia com 403 se o role do usuário tiver level < minLevel. */
     authorize(minLevel: number): onRequestHookHandler;
+    /**
+     * Deve vir depois de `authenticate()`. Bloqueia com 403 (`FINANCE.FORBIDDEN`) se o usuário não tiver
+     * um dos papéis financeiros informados. Independe do `Role.level` (segregação de funções).
+     */
+    authorizeFinance(allowedRoles: FinanceRoleName[]): onRequestHookHandler;
   }
 }

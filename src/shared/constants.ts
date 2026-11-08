@@ -1,5 +1,16 @@
+import { ROLE_LEVELS } from '@samuel-cardoso/ibbf-authz';
+
 /** Role atribuída automaticamente a quem se registra pelo endpoint público. */
 export const DEFAULT_USER_ROLE_NAME = 'Membro';
+
+/**
+ * Level mínimo para atribuir papéis financeiros (Pastor Titular). Só isso vem da hierarquia;
+ * ver ou lançar no financeiro depende do papel financeiro do usuário, não do level.
+ */
+export const FINANCE_ROLE_MANAGER_MIN_LEVEL = ROLE_LEVELS.PASTOR_TITULAR;
+
+/** Papéis que podem ler o livro-caixa e os saldos. */
+export const FINANCE_READ_ROLES = ['TREASURER', 'FISCAL_COUNCIL', 'PASTOR_VIEWER'] as const;
 
 export const PAGINATION = {
   DEFAULT_PAGE: 1,

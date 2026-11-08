@@ -73,6 +73,55 @@ import { MinistryMemberUpdateRoleController } from './usecases/ministry/ministry
 import { MinistryMemberUpdateRoleUseCase } from './usecases/ministry/ministry-member-update-role/ministry-member-update-role.usecase';
 import { MinistryMemberRemoveController } from './usecases/ministry/ministry-member-remove/ministry-member-remove.controller';
 import { MinistryMemberRemoveUseCase } from './usecases/ministry/ministry-member-remove/ministry-member-remove.usecase';
+import { PrismaFundRepository } from './infrastructure/prisma/prisma-fund.repository';
+import { PrismaFinanceCategoryRepository } from './infrastructure/prisma/prisma-finance-category.repository';
+import { PrismaCashAccountRepository } from './infrastructure/prisma/prisma-cash-account.repository';
+import { PrismaUserFinanceRoleRepository } from './infrastructure/prisma/prisma-user-finance-role.repository';
+import { PrismaFinancePeriodRepository } from './infrastructure/prisma/prisma-finance-period.repository';
+import { PrismaFinanceTransactionRepository } from './infrastructure/prisma/prisma-finance-transaction.repository';
+import { PrismaFinanceAuditLogRepository } from './infrastructure/prisma/prisma-finance-audit-log.repository';
+import { FinanceMeController } from './usecases/finance/finance-me/finance-me.controller';
+import { FinanceMeUseCase } from './usecases/finance/finance-me/finance-me.usecase';
+import { FinanceUserListController } from './usecases/finance/finance-user-list/finance-user-list.controller';
+import { FinanceUserListUseCase } from './usecases/finance/finance-user-list/finance-user-list.usecase';
+import { FinanceRoleAssignController } from './usecases/finance/finance-role-assign/finance-role-assign.controller';
+import { FinanceRoleAssignUseCase } from './usecases/finance/finance-role-assign/finance-role-assign.usecase';
+import { FinanceRoleRevokeController } from './usecases/finance/finance-role-revoke/finance-role-revoke.controller';
+import { FinanceRoleRevokeUseCase } from './usecases/finance/finance-role-revoke/finance-role-revoke.usecase';
+import { FundListController } from './usecases/finance/fund-list/fund-list.controller';
+import { FundListUseCase } from './usecases/finance/fund-list/fund-list.usecase';
+import { FundCreateController } from './usecases/finance/fund-create/fund-create.controller';
+import { FundCreateUseCase } from './usecases/finance/fund-create/fund-create.usecase';
+import { FundUpdateController } from './usecases/finance/fund-update/fund-update.controller';
+import { FundUpdateUseCase } from './usecases/finance/fund-update/fund-update.usecase';
+import { FinanceCategoryListController } from './usecases/finance/finance-category-list/finance-category-list.controller';
+import { FinanceCategoryListUseCase } from './usecases/finance/finance-category-list/finance-category-list.usecase';
+import { FinanceCategoryCreateController } from './usecases/finance/finance-category-create/finance-category-create.controller';
+import { FinanceCategoryCreateUseCase } from './usecases/finance/finance-category-create/finance-category-create.usecase';
+import { FinanceCategoryUpdateController } from './usecases/finance/finance-category-update/finance-category-update.controller';
+import { FinanceCategoryUpdateUseCase } from './usecases/finance/finance-category-update/finance-category-update.usecase';
+import { CashAccountListController } from './usecases/finance/cash-account-list/cash-account-list.controller';
+import { CashAccountListUseCase } from './usecases/finance/cash-account-list/cash-account-list.usecase';
+import { CashAccountCreateController } from './usecases/finance/cash-account-create/cash-account-create.controller';
+import { CashAccountCreateUseCase } from './usecases/finance/cash-account-create/cash-account-create.usecase';
+import { CashAccountUpdateController } from './usecases/finance/cash-account-update/cash-account-update.controller';
+import { CashAccountUpdateUseCase } from './usecases/finance/cash-account-update/cash-account-update.usecase';
+import { FinanceTransactionListController } from './usecases/finance/finance-transaction-list/finance-transaction-list.controller';
+import { FinanceTransactionListUseCase } from './usecases/finance/finance-transaction-list/finance-transaction-list.usecase';
+import { FinanceTransactionCreateController } from './usecases/finance/finance-transaction-create/finance-transaction-create.controller';
+import { FinanceTransactionCreateUseCase } from './usecases/finance/finance-transaction-create/finance-transaction-create.usecase';
+import { FinanceTransactionReverseController } from './usecases/finance/finance-transaction-reverse/finance-transaction-reverse.controller';
+import { FinanceTransactionReverseUseCase } from './usecases/finance/finance-transaction-reverse/finance-transaction-reverse.usecase';
+import { FinanceTransferCreateController } from './usecases/finance/finance-transfer-create/finance-transfer-create.controller';
+import { FinanceTransferCreateUseCase } from './usecases/finance/finance-transfer-create/finance-transfer-create.usecase';
+import { FinanceSummaryController } from './usecases/finance/finance-summary/finance-summary.controller';
+import { FinanceSummaryUseCase } from './usecases/finance/finance-summary/finance-summary.usecase';
+import { FinancePeriodListController } from './usecases/finance/finance-period-list/finance-period-list.controller';
+import { FinancePeriodListUseCase } from './usecases/finance/finance-period-list/finance-period-list.usecase';
+import { FinancePeriodCloseController } from './usecases/finance/finance-period-close/finance-period-close.controller';
+import { FinancePeriodCloseUseCase } from './usecases/finance/finance-period-close/finance-period-close.usecase';
+import { FinancePeriodReopenController } from './usecases/finance/finance-period-reopen/finance-period-reopen.controller';
+import { FinancePeriodReopenUseCase } from './usecases/finance/finance-period-reopen/finance-period-reopen.usecase';
 
 export const container = createContainer({ injectionMode: InjectionMode.PROXY });
 
@@ -90,6 +139,13 @@ container.register({
   familyRepository: asClass(PrismaFamilyRepository, { lifetime: Lifetime.SINGLETON }),
   ministryRepository: asClass(PrismaMinistryRepository, { lifetime: Lifetime.SINGLETON }),
   memberMinistryRepository: asClass(PrismaMemberMinistryRepository, { lifetime: Lifetime.SINGLETON }),
+  fundRepository: asClass(PrismaFundRepository, { lifetime: Lifetime.SINGLETON }),
+  financeCategoryRepository: asClass(PrismaFinanceCategoryRepository, { lifetime: Lifetime.SINGLETON }),
+  cashAccountRepository: asClass(PrismaCashAccountRepository, { lifetime: Lifetime.SINGLETON }),
+  userFinanceRoleRepository: asClass(PrismaUserFinanceRoleRepository, { lifetime: Lifetime.SINGLETON }),
+  financePeriodRepository: asClass(PrismaFinancePeriodRepository, { lifetime: Lifetime.SINGLETON }),
+  financeTransactionRepository: asClass(PrismaFinanceTransactionRepository, { lifetime: Lifetime.SINGLETON }),
+  financeAuditLogRepository: asClass(PrismaFinanceAuditLogRepository, { lifetime: Lifetime.SINGLETON }),
 
   healthCheckUseCase: asClass(HealthCheckUseCase, { lifetime: Lifetime.SCOPED }),
   healthCheckController: asClass(HealthCheckController, { lifetime: Lifetime.SCOPED }),
@@ -153,4 +209,47 @@ container.register({
   ministryMemberUpdateRoleController: asClass(MinistryMemberUpdateRoleController, { lifetime: Lifetime.SCOPED }),
   ministryMemberRemoveUseCase: asClass(MinistryMemberRemoveUseCase, { lifetime: Lifetime.SCOPED }),
   ministryMemberRemoveController: asClass(MinistryMemberRemoveController, { lifetime: Lifetime.SCOPED }),
+
+  financeMeUseCase: asClass(FinanceMeUseCase, { lifetime: Lifetime.SCOPED }),
+  financeMeController: asClass(FinanceMeController, { lifetime: Lifetime.SCOPED }),
+  financeUserListUseCase: asClass(FinanceUserListUseCase, { lifetime: Lifetime.SCOPED }),
+  financeUserListController: asClass(FinanceUserListController, { lifetime: Lifetime.SCOPED }),
+  financeRoleAssignUseCase: asClass(FinanceRoleAssignUseCase, { lifetime: Lifetime.SCOPED }),
+  financeRoleAssignController: asClass(FinanceRoleAssignController, { lifetime: Lifetime.SCOPED }),
+  financeRoleRevokeUseCase: asClass(FinanceRoleRevokeUseCase, { lifetime: Lifetime.SCOPED }),
+  financeRoleRevokeController: asClass(FinanceRoleRevokeController, { lifetime: Lifetime.SCOPED }),
+  fundListUseCase: asClass(FundListUseCase, { lifetime: Lifetime.SCOPED }),
+  fundListController: asClass(FundListController, { lifetime: Lifetime.SCOPED }),
+  fundCreateUseCase: asClass(FundCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  fundCreateController: asClass(FundCreateController, { lifetime: Lifetime.SCOPED }),
+  fundUpdateUseCase: asClass(FundUpdateUseCase, { lifetime: Lifetime.SCOPED }),
+  fundUpdateController: asClass(FundUpdateController, { lifetime: Lifetime.SCOPED }),
+  financeCategoryListUseCase: asClass(FinanceCategoryListUseCase, { lifetime: Lifetime.SCOPED }),
+  financeCategoryListController: asClass(FinanceCategoryListController, { lifetime: Lifetime.SCOPED }),
+  financeCategoryCreateUseCase: asClass(FinanceCategoryCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  financeCategoryCreateController: asClass(FinanceCategoryCreateController, { lifetime: Lifetime.SCOPED }),
+  financeCategoryUpdateUseCase: asClass(FinanceCategoryUpdateUseCase, { lifetime: Lifetime.SCOPED }),
+  financeCategoryUpdateController: asClass(FinanceCategoryUpdateController, { lifetime: Lifetime.SCOPED }),
+  cashAccountListUseCase: asClass(CashAccountListUseCase, { lifetime: Lifetime.SCOPED }),
+  cashAccountListController: asClass(CashAccountListController, { lifetime: Lifetime.SCOPED }),
+  cashAccountCreateUseCase: asClass(CashAccountCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  cashAccountCreateController: asClass(CashAccountCreateController, { lifetime: Lifetime.SCOPED }),
+  cashAccountUpdateUseCase: asClass(CashAccountUpdateUseCase, { lifetime: Lifetime.SCOPED }),
+  cashAccountUpdateController: asClass(CashAccountUpdateController, { lifetime: Lifetime.SCOPED }),
+  financeTransactionListUseCase: asClass(FinanceTransactionListUseCase, { lifetime: Lifetime.SCOPED }),
+  financeTransactionListController: asClass(FinanceTransactionListController, { lifetime: Lifetime.SCOPED }),
+  financeTransactionCreateUseCase: asClass(FinanceTransactionCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  financeTransactionCreateController: asClass(FinanceTransactionCreateController, { lifetime: Lifetime.SCOPED }),
+  financeTransactionReverseUseCase: asClass(FinanceTransactionReverseUseCase, { lifetime: Lifetime.SCOPED }),
+  financeTransactionReverseController: asClass(FinanceTransactionReverseController, { lifetime: Lifetime.SCOPED }),
+  financeTransferCreateUseCase: asClass(FinanceTransferCreateUseCase, { lifetime: Lifetime.SCOPED }),
+  financeTransferCreateController: asClass(FinanceTransferCreateController, { lifetime: Lifetime.SCOPED }),
+  financeSummaryUseCase: asClass(FinanceSummaryUseCase, { lifetime: Lifetime.SCOPED }),
+  financeSummaryController: asClass(FinanceSummaryController, { lifetime: Lifetime.SCOPED }),
+  financePeriodListUseCase: asClass(FinancePeriodListUseCase, { lifetime: Lifetime.SCOPED }),
+  financePeriodListController: asClass(FinancePeriodListController, { lifetime: Lifetime.SCOPED }),
+  financePeriodCloseUseCase: asClass(FinancePeriodCloseUseCase, { lifetime: Lifetime.SCOPED }),
+  financePeriodCloseController: asClass(FinancePeriodCloseController, { lifetime: Lifetime.SCOPED }),
+  financePeriodReopenUseCase: asClass(FinancePeriodReopenUseCase, { lifetime: Lifetime.SCOPED }),
+  financePeriodReopenController: asClass(FinancePeriodReopenController, { lifetime: Lifetime.SCOPED }),
 });
