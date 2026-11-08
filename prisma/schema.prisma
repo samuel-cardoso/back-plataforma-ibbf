@@ -37,6 +37,9 @@ model User {
   emailVerificationCodes EmailVerificationCode[]
   member                 Member?
 
+  financeRole         UserFinanceRole?
+  financeTransactions FinanceTransaction[]
+
   @@index([roleId])
   @@map("users")
 }
@@ -104,10 +107,11 @@ model Member {
   joinedAt     DateTime     @db.Date
   baptized     Boolean      @default(false)
 
-  user             User?            @relation(fields: [userId], references: [id])
-  family           Family?          @relation(fields: [familyId], references: [id])
-  ledMinistries    Ministry[]       @relation("MinistryLeader")
-  memberMinistries MemberMinistry[]
+  user                User?                @relation(fields: [userId], references: [id])
+  family              Family?              @relation(fields: [familyId], references: [id])
+  ledMinistries       Ministry[]           @relation("MinistryLeader")
+  memberMinistries    MemberMinistry[]
+  financeTransactions FinanceTransaction[]
 
   @@index([familyId])
   @@map("members")
@@ -174,4 +178,172 @@ model MemberMinistry {
 enum MinistryRole {
   LEADER
   MEMBER
+}
+
+// ===== Financeiro =====
+// Papéis financeiros são ortogonais ao `Role.level`: hierarquia eclesiástica não implica
+// acesso ao caixa (segregação de funções). Ver reports/Módulo financeiro para igrejas.md.
+
+enum FinanceRole {
+  TREASURER
+  FISCAL_COUNCIL
+  PASTOR_VIEWER
+  COUNTER
+}
+
+model UserFinanceRole {
+  id                      String      @id @default(uuid())
+  userId                  String      @unique
+  role                    FinanceRole
+  /// Ver valores de contribuição por pessoa (dado sensível — LGPD art. 11). Desligado por padrão.
+  canViewIndividualGiving Boolean     @default(false)
+  createdAt               DateTime    @default(now())
+  updatedAt               DateTime    @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_finance_roles")
+}
+
+model Fund {
+  id         String   @id @default(uuid())
+  name       String   @unique
+  /// Fundo com restrição (ITG 2002): só pode ser gasto na finalidade e nunca fica negativo.
+  restricted Boolean  @default(false)
+  active     Boolean  @default(true)
+  /// txid fixo usado no QR Pix estático deste fundo (ex.: MISSOES).
+  pixTxid    String?  @unique
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  transactions FinanceTransaction[]
+
+  @@map("funds")
+}
+
+enum FinanceCategoryType {
+  INCOME
+  EXPENSE
+}
+
+model FinanceCategory {
+  id             String              @id @default(uuid())
+  name           String
+  type           FinanceCategoryType
+  parentId       String?
+  /// Código no plano de contas do contador, para exportação.
+  accountingCode String?
+  active         Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+
+  parent       FinanceCategory?     @relation("FinanceCategoryTree", fields: [parentId], references: [id])
+  children     FinanceCategory[]    @relation("FinanceCategoryTree")
+  transactions FinanceTransaction[]
+
+  @@unique([type, name])
+  @@map("finance_categories")
+}
+
+enum CashAccountKind {
+  CASH
+  BANK
+}
+
+model CashAccount {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  kind      CashAccountKind
+  bankName  String?
+  active    Boolean         @default(true)
+  createdAt DateTime        @default(now())
+
+  transactions FinanceTransaction[]
+
+  @@map("cash_accounts")
+}
+
+enum FinanceTransactionKind {
+  INCOME
+  EXPENSE
+  TRANSFER
+  OPENING_BALANCE
+}
+
+enum PaymentMethod {
+  CASH
+  PIX
+  CARD
+  BANK_TRANSFER
+  CHECK
+  BOLETO
+}
+
+/// Livro-caixa imutável: nunca é editado nem apagado; correções são feitas por estorno
+/// (nova linha com `reversesId`). `amountCents` é com sinal: positivo entra, negativo sai.
+/// Saldo de fundo e de conta = SUM(amountCents) agrupado.
+model FinanceTransaction {
+  id                String                 @id @default(uuid())
+  kind              FinanceTransactionKind
+  date              DateTime               @db.Date
+  amountCents       Int
+  description       String?
+  fundId            String
+  cashAccountId     String
+  categoryId        String?
+  method            PaymentMethod?
+  memberId          String?
+  documentNumber    String?
+  /// Agrupa as duas pernas de uma transferência (conta→conta ou fundo→fundo).
+  transferGroupId   String?
+  /// Referência da aprovação (ex.: ata) — exigida para transferência entre fundos.
+  approvalReference String?
+  reversesId        String?                @unique
+  createdById       String
+  createdAt         DateTime               @default(now())
+
+  fund        Fund                @relation(fields: [fundId], references: [id])
+  cashAccount CashAccount         @relation(fields: [cashAccountId], references: [id])
+  category    FinanceCategory?    @relation(fields: [categoryId], references: [id])
+  member      Member?             @relation(fields: [memberId], references: [id], onDelete: SetNull)
+  reverses    FinanceTransaction? @relation("FinanceTransactionReversal", fields: [reversesId], references: [id])
+  reversedBy  FinanceTransaction? @relation("FinanceTransactionReversal")
+  createdBy   User                @relation(fields: [createdById], references: [id])
+
+  @@index([date])
+  @@index([fundId])
+  @@index([cashAccountId])
+  @@index([transferGroupId])
+  @@map("finance_transactions")
+}
+
+enum FinancePeriodStatus {
+  OPEN
+  CLOSED
+}
+
+/// Mês contábil. Ausência de linha = mês aberto. Mês fechado bloqueia novos lançamentos com data nele.
+model FinancePeriod {
+  id           String              @id @default(uuid())
+  year         Int
+  month        Int
+  status       FinancePeriodStatus @default(OPEN)
+  closedById   String?
+  closedAt     DateTime?
+  reopenReason String?
+
+  @@unique([year, month])
+  @@map("finance_periods")
+}
+
+model FinanceAuditLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  entity    String
+  entityId  String?
+  data      Json?
+  createdAt DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@map("finance_audit_logs")
 }
