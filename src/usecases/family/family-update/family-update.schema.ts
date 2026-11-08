@@ -7,6 +7,7 @@ export const familyUpdateParamsSchema = z.object({
 
 export const familyUpdateSchema = z.object({
   name: z.string().min(1).optional(),
+  address: z.string().nullable().optional(),
 });
 
 export const familyUpdateResponseSchema = z.object({

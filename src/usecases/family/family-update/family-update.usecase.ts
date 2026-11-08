@@ -14,7 +14,7 @@ export class FamilyUpdateUseCase {
     const family = await this.dependencies.familyRepository.findById(input.id);
     if (!family) throw new NotFoundError('Família');
 
-    family.update({ name: input.name });
+    family.update({ name: input.name, address: input.address });
 
     return this.dependencies.familyRepository.update(family);
   }

@@ -6,7 +6,8 @@ function makeExistingMember() {
   return Member.restore({
     id: 'member-1',
     userId: null,
-    familyId: null,
+    familyId: 'family-1',
+    familyRole: 'HEAD',
     fullName: 'João Silva',
     cpf: null,
     birthDate: new Date('1990-05-20'),
@@ -61,5 +62,18 @@ describe('MemberUpdateUseCase', () => {
     await expect(usecase.execute({ id: 'member-1', cpf: '123.456.789-00' })).rejects.toMatchObject({
       code: 'MEMBER.CPF_ALREADY_EXISTS',
     });
+  });
+
+  it('atualiza o parentesco do membro na família', async () => {
+    const updated = await usecase.execute({ id: 'member-1', familyRole: 'SPOUSE' });
+
+    expect(updated.familyRole).toBe('SPOUSE');
+  });
+
+  it('zera o parentesco quando o membro sai da família', async () => {
+    const updated = await usecase.execute({ id: 'member-1', familyId: null });
+
+    expect(updated.familyId).toBeNull();
+    expect(updated.familyRole).toBeNull();
   });
 });

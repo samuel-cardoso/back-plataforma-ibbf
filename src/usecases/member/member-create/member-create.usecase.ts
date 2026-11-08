@@ -31,6 +31,7 @@ export class MemberCreateUseCase {
       baptized: input.baptized,
       userId: input.userId,
       familyId: input.familyId,
+      familyRole: input.familyRole,
     });
 
     return this.dependencies.memberRepository.create(member);

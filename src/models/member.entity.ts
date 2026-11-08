@@ -2,11 +2,13 @@ import { DomainError } from '@/shared/errors';
 
 export type MemberType = 'MEMBER' | 'CONGREGANT' | 'VISITOR';
 export type MemberStatus = 'ACTIVE' | 'INACTIVE' | 'TRANSFERRED';
+export type FamilyRole = 'HEAD' | 'SPOUSE' | 'CHILD' | 'OTHER';
 
 export type MemberProps = {
   id: string | null;
   userId: string | null;
   familyId: string | null;
+  familyRole: FamilyRole | null;
   fullName: string;
   cpf: string | null;
   birthDate: Date;
@@ -33,6 +35,7 @@ export class Member {
     baptized?: boolean;
     userId?: string | null;
     familyId?: string | null;
+    familyRole?: FamilyRole | null;
     now?: Date;
   }): Member {
     const fullName = props.fullName?.trim();
@@ -48,6 +51,8 @@ export class Member {
       id: null,
       userId: props.userId ?? null,
       familyId: props.familyId ?? null,
+      // Parentesco só faz sentido dentro de uma família.
+      familyRole: props.familyId ? (props.familyRole ?? null) : null,
       fullName,
       cpf: Member.normalizeCpf(props.cpf),
       birthDate: props.birthDate,
@@ -68,6 +73,7 @@ export class Member {
   get id() { return this.props.id; }
   get userId() { return this.props.userId; }
   get familyId() { return this.props.familyId; }
+  get familyRole() { return this.props.familyRole; }
   get fullName() { return this.props.fullName; }
   get cpf() { return this.props.cpf; }
   get birthDate() { return this.props.birthDate; }
@@ -89,6 +95,7 @@ export class Member {
     joinedAt?: Date;
     baptized?: boolean;
     familyId?: string | null;
+    familyRole?: FamilyRole | null;
     userId?: string | null;
   }) {
     if (patch.fullName !== undefined) {
@@ -115,6 +122,9 @@ export class Member {
     if (patch.joinedAt !== undefined) this.props.joinedAt = patch.joinedAt;
     if (patch.baptized !== undefined) this.props.baptized = patch.baptized;
     if (patch.familyId !== undefined) this.props.familyId = patch.familyId;
+    if (patch.familyRole !== undefined) this.props.familyRole = patch.familyRole;
+    // Sair da família (ou nunca ter tido uma) zera o parentesco.
+    if (!this.props.familyId) this.props.familyRole = null;
     if (patch.userId !== undefined) this.props.userId = patch.userId;
   }
 
@@ -123,6 +133,7 @@ export class Member {
       id: this.props.id,
       userId: this.props.userId,
       familyId: this.props.familyId,
+      familyRole: this.props.familyRole,
       fullName: this.props.fullName,
       cpf: this.props.cpf,
       birthDate: this.props.birthDate.toISOString().slice(0, 10),

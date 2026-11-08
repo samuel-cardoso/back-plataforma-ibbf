@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { memberResponseItemSchema, memberErrorSchema, memberTypeSchema, memberStatusSchema } from '../member-create/member-create.schema';
+import { memberResponseItemSchema, memberErrorSchema, memberTypeSchema, memberStatusSchema, familyRoleSchema } from '../member-create/member-create.schema';
 
 export const memberUpdateParamsSchema = z.object({
   id: z.string().uuid(),
@@ -16,6 +16,7 @@ export const memberUpdateSchema = z.object({
   joinedAt: z.coerce.date().optional(),
   baptized: z.boolean().optional(),
   familyId: z.string().uuid().nullable().optional(),
+  familyRole: familyRoleSchema.nullable().optional(),
   userId: z.string().uuid().nullable().optional(),
 });
 

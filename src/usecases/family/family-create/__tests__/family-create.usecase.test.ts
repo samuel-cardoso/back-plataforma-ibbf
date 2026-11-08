@@ -33,4 +33,12 @@ describe('FamilyCreateUseCase', () => {
     await expect(usecase.execute({ name: '  ' })).rejects.toMatchObject({ code: 'FAMILY.INVALID_NAME' });
     expect(deps.familyRepository.create).not.toHaveBeenCalled();
   });
+
+  it('grava o endereço quando informado e normaliza vazio para null', async () => {
+    const withAddress = await usecase.execute({ name: 'Família Silva', address: '  Rua das Flores, 123  ' });
+    const withoutAddress = await usecase.execute({ name: 'Família Souza', address: '   ' });
+
+    expect(withAddress.address).toBe('Rua das Flores, 123');
+    expect(withoutAddress.address).toBeNull();
+  });
 });

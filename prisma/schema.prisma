@@ -93,6 +93,7 @@ model Member {
   id           String       @id @default(uuid())
   userId       String?      @unique
   familyId     String?
+  familyRole   FamilyRole?
   fullName     String
   cpf          String?      @unique
   birthDate    DateTime     @db.Date
@@ -124,9 +125,17 @@ enum MemberStatus {
   TRANSFERRED
 }
 
+enum FamilyRole {
+  HEAD
+  SPOUSE
+  CHILD
+  OTHER
+}
+
 model Family {
   id        String   @id @default(uuid())
   name      String
+  address   String?
   createdAt DateTime @default(now())
 
   members Member[]

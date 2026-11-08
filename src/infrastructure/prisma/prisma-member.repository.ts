@@ -8,6 +8,7 @@ type MemberRow = {
   id: string;
   userId: string | null;
   familyId: string | null;
+  familyRole: MemberProps['familyRole'];
   fullName: string;
   cpf: string | null;
   birthDate: Date;
@@ -87,6 +88,7 @@ export class PrismaMemberRepository implements MemberRepositoryPort {
     return {
       userId: member.userId,
       familyId: member.familyId,
+      familyRole: member.familyRole,
       fullName: member.fullName,
       cpf: member.cpf,
       birthDate: member.birthDate,

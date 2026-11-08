@@ -10,7 +10,7 @@ export class FamilyCreateUseCase {
   constructor(private readonly dependencies: Dependencies) {}
 
   async execute(input: FamilyCreateInput): Promise<Family> {
-    const family = Family.create({ name: input.name });
+    const family = Family.create({ name: input.name, address: input.address });
     return this.dependencies.familyRepository.create(family);
   }
 }

@@ -3,14 +3,14 @@ import { Family } from '@/models';
 import { FamilyRepositoryPort } from '@/repositories';
 import { PrismaService } from './prisma.service';
 
-type FamilyRow = { id: string; name: string; createdAt: Date };
+type FamilyRow = { id: string; name: string; address: string | null; createdAt: Date };
 
 export class PrismaFamilyRepository implements FamilyRepositoryPort {
   constructor(private readonly dependencies: { prismaService: PrismaService }) {}
 
   async create(family: Family): Promise<Family> {
     const created = await this.dependencies.prismaService.client.family.create({
-      data: { name: family.name },
+      data: { name: family.name, address: family.address },
     });
     return this.toEntity(created);
   }
@@ -46,7 +46,7 @@ export class PrismaFamilyRepository implements FamilyRepositoryPort {
   async update(family: Family): Promise<Family> {
     const updated = await this.dependencies.prismaService.client.family.update({
       where: { id: family.id as string },
-      data: { name: family.name },
+      data: { name: family.name, address: family.address },
     });
     return this.toEntity(updated);
   }

@@ -1,4 +1,4 @@
-import type { MemberStatus, MemberType } from '@/models';
+import type { FamilyRole, MemberStatus, MemberType } from '@/models';
 
 export interface MemberCreateInput {
   fullName: string;
@@ -12,4 +12,5 @@ export interface MemberCreateInput {
   baptized?: boolean;
   userId?: string;
   familyId?: string;
+  familyRole?: FamilyRole;
 }

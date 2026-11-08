@@ -2,11 +2,13 @@ import { z } from 'zod';
 
 export const familyCreateSchema = z.object({
   name: z.string().min(1),
+  address: z.string().optional(),
 });
 
 export const familyResponseItemSchema = z.object({
   id: z.string(),
   name: z.string(),
+  address: z.string().nullable(),
   createdAt: z.string(),
 });
 

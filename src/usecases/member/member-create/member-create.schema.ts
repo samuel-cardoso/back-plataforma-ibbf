@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 export const memberTypeSchema = z.enum(['MEMBER', 'CONGREGANT', 'VISITOR']);
 export const memberStatusSchema = z.enum(['ACTIVE', 'INACTIVE', 'TRANSFERRED']);
+export const familyRoleSchema = z.enum(['HEAD', 'SPOUSE', 'CHILD', 'OTHER']);
 
 export const memberCreateSchema = z.object({
   fullName: z.string().min(1),
@@ -15,12 +16,14 @@ export const memberCreateSchema = z.object({
   baptized: z.boolean().optional(),
   userId: z.string().uuid().optional(),
   familyId: z.string().uuid().optional(),
+  familyRole: familyRoleSchema.optional(),
 });
 
 export const memberResponseItemSchema = z.object({
   id: z.string(),
   userId: z.string().nullable(),
   familyId: z.string().nullable(),
+  familyRole: familyRoleSchema.nullable(),
   fullName: z.string(),
   cpf: z.string().nullable(),
   birthDate: z.string(),

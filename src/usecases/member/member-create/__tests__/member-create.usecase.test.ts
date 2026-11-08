@@ -55,4 +55,16 @@ describe('MemberCreateUseCase', () => {
       code: 'MEMBER.INVALID_FULL_NAME',
     });
   });
+
+  it('grava o parentesco quando o membro pertence a uma família', async () => {
+    const member = await usecase.execute(makeInput({ familyId: 'family-1', familyRole: 'CHILD' }));
+
+    expect(member.familyRole).toBe('CHILD');
+  });
+
+  it('ignora o parentesco quando o membro não tem família', async () => {
+    const member = await usecase.execute(makeInput({ familyRole: 'CHILD' }));
+
+    expect(member.familyRole).toBeNull();
+  });
 });

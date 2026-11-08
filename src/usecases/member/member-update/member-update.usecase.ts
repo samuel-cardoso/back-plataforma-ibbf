@@ -33,6 +33,7 @@ export class MemberUpdateUseCase {
       joinedAt: input.joinedAt,
       baptized: input.baptized,
       familyId: input.familyId,
+      familyRole: input.familyRole,
       userId: input.userId,
     });
 
